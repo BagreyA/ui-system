@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 export default function Docs({ showDocsPanel, onToggleDocsPanel }) {
   const [activeSection, setActiveSection] = useState("graphs");
+  const [hoveredSection, setHoveredSection] = useState(null);
 
   const sections = {
     graphs: {
@@ -23,6 +24,7 @@ export default function Docs({ showDocsPanel, onToggleDocsPanel }) {
     },
     simulation: {
       title: "Параметры симуляции",
+      subItems: ["Simulation Duration", "Num Frames", "Update Interval", "Num Users"],
       content: (
         <>
           <div style={{ marginBottom: "15px" }}>
@@ -65,6 +67,7 @@ export default function Docs({ showDocsPanel, onToggleDocsPanel }) {
     },
     users: {
       title: "Параметры пользователей (UE)",
+      subItems: ["Скорость/Пауза/Alpha", "x, y координаты", "UE Class", "Buffer Size"],
       content: (
         <>
           <div style={{ marginBottom: "15px" }}>
@@ -107,6 +110,7 @@ export default function Docs({ showDocsPanel, onToggleDocsPanel }) {
     },
     traffic: {
       title: "Параметры трафика",
+      subItems: ["PoissonModel", "OnOffModel"],
       content: (
         <>
           <div style={{ marginBottom: "15px" }}>
@@ -141,6 +145,7 @@ export default function Docs({ showDocsPanel, onToggleDocsPanel }) {
     },
     channel: {
       title: "Параметры канала",
+      subItems: ["Channel Model"],
       content: (
         <>
           <p style={{
@@ -165,6 +170,7 @@ export default function Docs({ showDocsPanel, onToggleDocsPanel }) {
     },
     enodeb: {
       title: "Базовая станция (eNodeB)",
+      subItems: ["eNodeB Configuration"],
       content: (
         <>
           <p style={{
@@ -189,6 +195,7 @@ export default function Docs({ showDocsPanel, onToggleDocsPanel }) {
     },
     scheduler: {
       title: "Планировщик",
+      subItems: ["Scheduler Type"],
       content: (
         <>
           <p style={{
@@ -213,131 +220,102 @@ export default function Docs({ showDocsPanel, onToggleDocsPanel }) {
     }
   };
 
-  const sectionItems = [
-    { id: "graphs", label: "Параметры графиков и метрик" },
-    { id: "simulation", label: "Параметры симуляции" },
-    { id: "users", label: "Параметры пользователей (UE)" },
-    { id: "traffic", label: "Параметры трафика" },
-    { id: "channel", label: "Параметры канала" },
-    { id: "enodeb", label: "Базовая станция (eNodeB)" },
-    { id: "scheduler", label: "Планировщик" }
-  ];
+  const sectionItems = Object.keys(sections).map((key) => ({
+    id: key,
+    label: sections[key].title,
+    subItems: sections[key].subItems
+  }));
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", fontFamily: "sans-serif" }}>
-      {/* Панель разделов документации (слева от основного контента) */}
       {showDocsPanel && (
-        <div style={{ 
+        <div style={{
           width: "300px",
-          backgroundColor: "white", 
-          borderRadius: "0 22px 22px 0", 
+          backgroundColor: "white",
+          borderRadius: "0 22px 22px 0",
           padding: "20px",
-          fontFamily: "sans-serif",
           fontSize: "14px",
           color: "#2A3D4C",
           border: "2px solid #00A7C1",
-          margin: "10px 20px 10px -10px",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.08)",
-          height: "680px",
+          margin: "10px 20px 10px -17px",
+          height: "653px",
           overflow: "auto",
-          scrollbarWidth: "thin",
-          scrollbarColor: "#00A7C1 #f0f0f0"
+          boxShadow: "0 4px 8px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.08)"
         }}>
-          {/* Стили для Webkit браузеров (Chrome, Safari, Edge) */}
-          <style>
-            {`
-              div::-webkit-scrollbar {
-                width: 8px;
-              }
-              div::-webkit-scrollbar-track {
-                background: #f0f0f0;
-                border-radius: 0 4px 4px 0;
-              }
-              div::-webkit-scrollbar-thumb {
-                background: #00A7C1;
-                border-radius: 4px;
-                border: 1px solid #f0f0f0;
-              }
-              div::-webkit-scrollbar-thumb:hover {
-                background: #0095B3;
-              }
-            `}
-          </style>
-
-          <div style={{ 
-            color: "#222933", 
+          <div style={{
+            color: "#222933",
             marginBottom: "20px",
             fontSize: "18px",
-            fontFamily: "sans-serif",
             fontWeight: "bold",
             textAlign: "center"
           }}>
             Разделы документации
           </div>
 
-          {/* Разделы документации */}
-          <div style={{ marginBottom: "25px" }}>
+          <div>
             {sectionItems.map((item) => (
-              <div 
-                key={item.id}
-                onClick={() => setActiveSection(item.id)}
-                style={{ 
-                  fontSize: "16px",
-                  fontWeight: "bold",
-                  marginBottom: "15px",
-                  color: activeSection === item.id ? "#00A7C1" : "#222933",
-                  cursor: "pointer",
-                  padding: "8px 12px",
-                  borderRadius: "6px",
-                  backgroundColor: activeSection === item.id ? "#e6f7fa" : "#f8f9fa",
-                  border: activeSection === item.id ? "2px solid #00A7C1" : "2px solid transparent",
-                  transition: "all 0.2s ease",
-                  fontFamily: "sans-serif"
-                }}
-              >
-                {item.label}
+              <div key={item.id}>
+                <div
+                  onClick={() => setActiveSection(item.id)}
+                  onMouseEnter={() => setHoveredSection(item.id)}
+                  onMouseLeave={() => setHoveredSection(null)}
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: "bold",
+                    marginBottom: "5px",
+                    color: activeSection === item.id ? "#00A7C1" : "#222933",
+                    cursor: "pointer",
+                    padding: "8px 12px",
+                    borderRadius: "6px",
+                    backgroundColor: activeSection === item.id ? "#e6f7fa" : "#f8f9fa",
+                    border: activeSection === item.id ? "2px solid #00A7C1" : "2px solid transparent",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  {item.label}
+                </div>
+
+                {/* Подпункты */}
+                {hoveredSection === item.id && item.subItems && (
+                  <div style={{
+                    marginLeft: "20px",
+                    marginTop: "5px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                    marginBottom: "4px"
+                  }}>
+                    {item.subItems.map((sub, idx) => (
+                      <div key={idx} style={{
+                        fontSize: "14px",
+                        color: "#2A3D4C",
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                        backgroundColor: "#f0f4f5",
+                      }}>
+                        {sub}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Основной контент документации */}
-      <div style={{ 
-        flex: 1, 
-        marginLeft: showDocsPanel ? "0" : "30px",
-        paddingTop: "20px",
-        paddingLeft: "20px",
-        paddingRight: "20px",
-        fontFamily: "sans-serif"
-      }}>
-        <h1 
-          style={{
-            fontSize: "30px",
-            fontFamily: "sans-serif",
-            color: "#222933",
-            marginBottom: "20px"
-          }}
-        >
-          Документация
-        </h1>
-        
+      <div style={{ flex: 1, marginLeft: showDocsPanel ? "0" : "30px", padding: "20px" }}>
+        <h1 style={{ fontSize: "30px", marginBottom: "20px" }}>Документация</h1>
         <div style={{
           backgroundColor: "white",
           borderRadius: "12px",
           padding: "25px",
-          boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
           marginBottom: "25px"
         }}>
-          <h2 style={{
-            fontSize: "24px",
-            fontFamily: "sans-serif",
-            color: "#222933",
-            marginBottom: "15px"
-          }}>
+          <h2 style={{ fontSize: "24px", marginBottom: "15px" }}>
             {sections[activeSection].title}
           </h2>
-          
           {sections[activeSection].content}
         </div>
       </div>
