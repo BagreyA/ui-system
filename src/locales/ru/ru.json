@@ -1,0 +1,166 @@
+{
+  "documentationTitle": "Документация",
+  "documentationSections": "Разделы документации",
+  "sections": {
+    "graphs": {
+      "title": "Параметры графиков и метрик",
+      "content": [
+        {
+          "title": "",
+          "text": "Добро пожаловать на страницу объяснения параметров визуализации и метрик симуляции. Здесь вы найдете описание всех второстепенных настроек, которые можно изменять на странице с графиками, чтобы анализировать результаты работы LTE-сети."
+        }
+      ]
+    },
+    "simulation": {
+      "title": "Параметры симуляции",
+      "subItems": ["Simulation Duration", "Num Frames", "Update Interval", "Num Users"],
+      "content": [
+        { "title": "Simulation Duration (ms)", "text": "Общая продолжительность симуляции в миллисекундах." },
+        { "title": "Num Frames", "text": "Количество кадров для симуляции." },
+        { "title": "Update Interval (ms)", "text": "Интервал обновления данных в миллисекундах." },
+        { "title": "Num Users", "text": "Количество пользователей в симуляции." }
+      ]
+    },
+    "users": {
+      "title": "Параметры пользователей (UE)",
+      "subItems": ["Скорость/Пауза/Alpha", "x, y координаты", "UE Class", "Buffer Size"],
+      "content": [
+        { "title": "Скорость/Пауза/Alpha", "text": "Параметры мобильности пользователя: скорость движения, время паузы, коэффициент альфа." },
+        { "title": "x, y – текущие координаты пользователя", "text": "Текущие координаты пользовательского оборудования на карте симуляции." },
+        { "title": "UE Class", "text": "Класс пользовательского оборудования." },
+        { "title": "Buffer Size", "text": "Размер буфера пользовательского оборудования." }
+      ]
+    },
+    "traffic": {
+      "title": "Параметры трафика",
+      "subItems": ["PoissonModel", "OnOffModel"],
+      "content": [
+        { "title": "PoissonModel", "text": "Модель трафика Пуассона:\n- packet_rate - интенсивность пакетов\n- min_packet_size - минимальный размер пакета\n- max_packet_size - максимальный размер пакета" },
+        { "title": "OnOffModel", "text": "Модель трафика Вкл/Выкл:\n- duration_on - продолжительность активной фазы\n- duration_off - продолжительность неактивной фазы\n- packet_rate - интенсивность пакетов в активной фазе" }
+      ]
+    },
+    "channel": {
+      "title": "Параметры канала",
+      "subItems": ["Channel Model"],
+      "content": [
+        { "title": "Channel Model", "text": "Раздел с параметрами канальной передачи данных. Модель канальной передачи данных." }
+      ]
+    },
+    "enodeb": {
+      "title": "Базовая станция (eNodeB)",
+      "subItems": ["eNodeB Configuration"],
+      "content": [
+        { "title": "eNodeB Configuration", "text": "Параметры базовой станции LTE. Конфигурация базовой станции." }
+      ]
+    },
+    "scheduler": {
+      "title": "Планировщик",
+      "subItems": ["Scheduler Type"],
+      "content": [
+        { "title": "Scheduler Type", "text": "Параметры алгоритма планирования ресурсов. Тип используемого планировщика." }
+      ]
+    }
+  },
+  "home": {
+    "welcome": "Добро пожаловать в LTE Network Simulator!",
+    "description": "Моделируйте работу LTE-сети, распределение ресурсов между пользователями и анализируйте ключевые метрики: пропускную способность, справедливость и эффективность планировщика.",
+    "startButton": "Начать",
+    "overview": "Обзор"
+  },
+  "tabs": {
+    "home": "",
+    "settings": "среда",
+    "visualization": "графики",
+    "tests": "тесты",
+    "docs": "гайд",
+    "about": "о нас",
+    "save": "сохранить",
+    "load": "загрузка"
+  },
+  "about": {
+    "title": "Команда разработки",
+    "text": "Раздел пока находится в разработке и будет завершен на завершающем этапе проекта."
+  },
+
+  "title": "Тесты",
+  "listTitle": "Список тестов",
+
+  "list": {
+    "schedulerBuffer": "Тест планировщика с буфером",
+    "visualizeTimeline": "Тест визуализации LTE временной шкалы",
+    "schedulerGrid": "Тест сетки планировщика",
+    "schedulerMetrics": "Тест метрик планировщика",
+    "schedulerEfficiency": "Тест эффективности планировщика"
+  },
+
+  "runButton": "Запустить",
+
+  "outputTitle": "Вывод тестов",
+  "outputReady": "Готов к запуску теста:",
+  "outputSelect": "Выберите тест для запуска...",
+  "loading": "Выполняется...",
+  "error": "Ошибка",
+  "errorDefault": "Что-то пошло не так",
+  "noServerData": "Нет данных от сервера",
+  "runningTest": "Запуск теста...",
+
+  "settings": {
+    "title": "Основные настройки",
+    "savedConfigs": "Список сохранённых конфигураций",
+    "selectConfig": "Выберите конфигурацию",
+    "loadConfig": "Загрузить",
+    "userDevice": "Пользовательские устройства",
+    "userCount": "Уникальный индетификатор пользователя",
+    "userId": "кол-во устройств ",
+    "movementModels": "Модели передвижения абонентов",
+    "additionalParams": "Дополнительные параметры",
+    "min": "мин",
+    "max": "макс",
+    "pauseTime": "пауза:",
+    "trafficModel": "Модель трафика",
+    "additionalTrafficParams": "Дополнительные параметры трафика",
+    "averageTrafficIntensity": "Средняя интенсивность трафика",
+    "packetsPerSec": "пакет/сек",
+    "averageActivePhaseDuration": "Средняя длительность активной фазы",
+    "averageInactivePhaseDuration": "Средняя длительность неактивной фазы",
+    "trafficIntensityActivePhase": "Интенсивность трафика в активной фазе",
+    "scheduler": "Планировщик",
+    "startSimulation": "Запустить симуляцию",
+    "clearParameters": "Очистить параметры",
+    "config": {
+      "default": "По умолчанию",
+      "highLoad": "Высокая нагрузка",
+      "lowLatency": "Низкая задержка",
+      "maxThroughput": "Максимальная пропускная способность",
+      "balanced": "Сбалансированная"
+    },
+    "movement": {
+      "randomWalk": "Модель случайного блуждания",
+      "randomWaypoint": "Модель случайной точки назначения",
+      "randomDirection": "Модель случайного направления",
+      "gaussMarkov": "Модель Гаусса-Маркова"
+    },
+    "traffic": {
+      "poisson": "Модель Пуассона",
+     "onOff": "Модель On/Off",
+     "mmpp": "MMPP модель"
+    },
+    "schedulerOptions": {
+     "roundRobin": "Round Robin",
+     "bestCQI": "Лучшее CQI",
+     "proportionalFair": "Пропорционально справедливый"
+    }
+  },
+    "saveModal": {
+    "title": "Сохранить конфигурацию",
+    "fileNameLabel": "Введите имя конфигурации",
+    "descriptionLabel": "Описание",
+    "saveButton": "Сохранить"
+  },
+  "loadModal": {
+    "title": "Загрузить конфигурацию",
+    "uploadFileLabel": "Загрузите файл с компьютера",
+    "enterLinkLabel": "Введите ссылку",
+    "uploadButton": "Загрузить"
+  }
+}

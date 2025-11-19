@@ -1,224 +1,34 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
-export default function Docs({ showDocsPanel, onToggleDocsPanel }) {
+const SectionItem = ({ title, text }) => (
+  <div style={{ marginBottom: "15px" }}>
+    <h3 style={{
+      fontSize: "20px",
+      fontWeight: "bold",
+      color: "#2A3D4C",
+      marginBottom: "8px",
+      fontFamily: "sans-serif"
+    }}>
+      {title}
+    </h3>
+    <p style={{
+      fontSize: "15px",
+      color: "#2A3D4C",
+      lineHeight: "1.5",
+      fontFamily: "sans-serif"
+    }}>
+      {text}
+    </p>
+  </div>
+);
+
+export default function Docs({ showDocsPanel }) {
+  const { t } = useTranslation("docs");
+  const sections = t("sections", { returnObjects: true });
+
   const [activeSection, setActiveSection] = useState("graphs");
   const [hoveredSection, setHoveredSection] = useState(null);
-
-  const sections = {
-    graphs: {
-      title: "Параметры графиков и метрик",
-      content: (
-        <>
-          <p style={{
-            fontSize: "15px",
-            fontFamily: "sans-serif",
-            color: "#2A3D4C",
-            lineHeight: "1.6",
-            marginBottom: "20px"
-          }}>
-            Добро пожаловать на страницу объяснения параметров визуализации и метрик симуляции.
-            Здесь вы найдете описание всех второстепенных настроек, которые можно изменять на странице с графиками, чтобы анализировать результаты работы LTE-сети.
-          </p>
-        </>
-      )
-    },
-    simulation: {
-      title: "Параметры симуляции",
-      subItems: ["Simulation Duration", "Num Frames", "Update Interval", "Num Users"],
-      content: (
-        <>
-          <div style={{ marginBottom: "15px" }}>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#2A3D4C", marginBottom: "8px", fontFamily: "sans-serif" }}>
-              Simulation Duration (ms)
-            </h3>
-            <p style={{ fontSize: "15px", color: "#2A3D4C", lineHeight: "1.5", fontFamily: "sans-serif" }}>
-              Общая продолжительность симуляции в миллисекундах.
-            </p>
-          </div>
-
-          <div style={{ marginBottom: "15px" }}>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#2A3D4C", marginBottom: "8px", fontFamily: "sans-serif" }}>
-              Num Frames
-            </h3>
-            <p style={{ fontSize: "15px", color: "#2A3D4C", lineHeight: "1.5", fontFamily: "sans-serif" }}>
-              Количество кадров для симуляции.
-            </p>
-          </div>
-
-          <div style={{ marginBottom: "15px" }}>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#2A3D4C", marginBottom: "8px", fontFamily: "sans-serif" }}>
-              Update Interval (ms)
-            </h3>
-            <p style={{ fontSize: "15px", color: "#2A3D4C", lineHeight: "1.5", fontFamily: "sans-serif" }}>
-              Интервал обновления данных в миллисекундах.
-            </p>
-          </div>
-
-          <div style={{ marginBottom: "15px" }}>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#2A3D4C", marginBottom: "8px", fontFamily: "sans-serif" }}>
-              Num Users
-            </h3>
-            <p style={{ fontSize: "15px", color: "#2A3D4C", lineHeight: "1.5", fontFamily: "sans-serif" }}>
-              Количество пользователей в симуляции.
-            </p>
-          </div>
-        </>
-      )
-    },
-    users: {
-      title: "Параметры пользователей (UE)",
-      subItems: ["Скорость/Пауза/Alpha", "x, y координаты", "UE Class", "Buffer Size"],
-      content: (
-        <>
-          <div style={{ marginBottom: "15px" }}>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#2A3D4C", marginBottom: "8px", fontFamily: "sans-serif" }}>
-              Скорость/Пауза/Alpha
-            </h3>
-            <p style={{ fontSize: "15px", color: "#2A3D4C", lineHeight: "1.5", fontFamily: "sans-serif" }}>
-              Параметры мобильности пользователя: скорость движения, время паузы, коэффициент альфа.
-            </p>
-          </div>
-
-          <div style={{ marginBottom: "15px" }}>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#2A3D4C", marginBottom: "8px", fontFamily: "sans-serif" }}>
-              x, y – текущие координаты пользователя
-            </h3>
-            <p style={{ fontSize: "15px", color: "#2A3D4C", lineHeight: "1.5", fontFamily: "sans-serif" }}>
-              Текущие координаты пользовательского оборудования на карте симуляции.
-            </p>
-          </div>
-
-          <div style={{ marginBottom: "15px" }}>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#2A3D4C", marginBottom: "8px", fontFamily: "sans-serif" }}>
-              UE Class
-            </h3>
-            <p style={{ fontSize: "15px", color: "#2A3D4C", lineHeight: "1.5", fontFamily: "sans-serif" }}>
-              Класс пользовательского оборудования.
-            </p>
-          </div>
-
-          <div style={{ marginBottom: "15px" }}>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#2A3D4C", marginBottom: "8px", fontFamily: "sans-serif" }}>
-              Buffer Size
-            </h3>
-            <p style={{ fontSize: "15px", color: "#2A3D4C", lineHeight: "1.5", fontFamily: "sans-serif" }}>
-              Размер буфера пользовательского оборудования.
-            </p>
-          </div>
-        </>
-      )
-    },
-    traffic: {
-      title: "Параметры трафика",
-      subItems: ["PoissonModel", "OnOffModel"],
-      content: (
-        <>
-          <div style={{ marginBottom: "15px" }}>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#2A3D4C", marginBottom: "8px", fontFamily: "sans-serif" }}>
-              PoissonModel
-            </h3>
-            <p style={{ fontSize: "15px", color: "#2A3D4C", lineHeight: "1.5", marginBottom: "10px", fontFamily: "sans-serif" }}>
-              Модель трафика Пуассона:
-            </p>
-            <ul style={{ fontSize: "15px", color: "#2A3D4C", lineHeight: "1.5", paddingLeft: "20px", fontFamily: "sans-serif" }}>
-              <li><strong style={{ fontFamily: "sans-serif" }}>packet_rate</strong> - интенсивность пакетов</li>
-              <li><strong style={{ fontFamily: "sans-serif" }}>min_packet_size</strong> - минимальный размер пакета</li>
-              <li><strong style={{ fontFamily: "sans-serif" }}>max_packet_size</strong> - максимальный размер пакета</li>
-            </ul>
-          </div>
-
-          <div style={{ marginBottom: "15px" }}>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#2A3D4C", marginBottom: "8px", fontFamily: "sans-serif" }}>
-              OnOffModel
-            </h3>
-            <p style={{ fontSize: "15px", color: "#2A3D4C", lineHeight: "1.5", marginBottom: "10px", fontFamily: "sans-serif" }}>
-              Модель трафика Вкл/Выкл:
-            </p>
-            <ul style={{ fontSize: "15px", color: "#2A3D4C", lineHeight: "1.5", paddingLeft: "20px", fontFamily: "sans-serif" }}>
-              <li><strong style={{ fontFamily: "sans-serif" }}>duration_on</strong> - продолжительность активной фазы</li>
-              <li><strong style={{ fontFamily: "sans-serif" }}>duration_off</strong> - продолжительность неактивной фазы</li>
-              <li><strong style={{ fontFamily: "sans-serif" }}>packet_rate</strong> - интенсивность пакетов в активной фазе</li>
-            </ul>
-          </div>
-        </>
-      )
-    },
-    channel: {
-      title: "Параметры канала",
-      subItems: ["Channel Model"],
-      content: (
-        <>
-          <p style={{
-            fontSize: "15px",
-            fontFamily: "sans-serif",
-            color: "#2A3D4C",
-            lineHeight: "1.6",
-            marginBottom: "20px"
-          }}>
-            Раздел с параметрами канальной передачи данных.
-          </p>
-          <div style={{ marginBottom: "15px" }}>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#2A3D4C", marginBottom: "8px", fontFamily: "sans-serif" }}>
-              Channel Model
-            </h3>
-            <p style={{ fontSize: "15px", color: "#2A3D4C", lineHeight: "1.5", fontFamily: "sans-serif" }}>
-              Модель канальной передачи данных.
-            </p>
-          </div>
-        </>
-      )
-    },
-    enodeb: {
-      title: "Базовая станция (eNodeB)",
-      subItems: ["eNodeB Configuration"],
-      content: (
-        <>
-          <p style={{
-            fontSize: "15px",
-            fontFamily: "sans-serif",
-            color: "#2A3D4C",
-            lineHeight: "1.6",
-            marginBottom: "20px"
-          }}>
-            Параметры базовой станции LTE.
-          </p>
-          <div style={{ marginBottom: "15px" }}>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#2A3D4C", marginBottom: "8px", fontFamily: "sans-serif" }}>
-              eNodeB Configuration
-            </h3>
-            <p style={{ fontSize: "15px", color: "#2A3D4C", lineHeight: "1.5", fontFamily: "sans-serif" }}>
-              Конфигурация базовой станции.
-            </p>
-          </div>
-        </>
-      )
-    },
-    scheduler: {
-      title: "Планировщик",
-      subItems: ["Scheduler Type"],
-      content: (
-        <>
-          <p style={{
-            fontSize: "15px",
-            fontFamily: "sans-serif",
-            color: "#2A3D4C",
-            lineHeight: "1.6",
-            marginBottom: "20px"
-          }}>
-            Параметры алгоритма планирования ресурсов.
-          </p>
-          <div style={{ marginBottom: "15px" }}>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#2A3D4C", marginBottom: "8px", fontFamily: "sans-serif" }}>
-              Scheduler Type
-            </h3>
-            <p style={{ fontSize: "15px", color: "#2A3D4C", lineHeight: "1.5", fontFamily: "sans-serif" }}>
-              Тип используемого планировщика.
-            </p>
-          </div>
-        </>
-      )
-    }
-  };
 
   const sectionItems = Object.keys(sections).map((key) => ({
     id: key,
@@ -228,6 +38,7 @@ export default function Docs({ showDocsPanel, onToggleDocsPanel }) {
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", fontFamily: "sans-serif" }}>
+      {/* Левая панель документации */}
       {showDocsPanel && (
         <div style={{
           width: "300px",
@@ -247,9 +58,10 @@ export default function Docs({ showDocsPanel, onToggleDocsPanel }) {
             marginBottom: "20px",
             fontSize: "18px",
             fontWeight: "bold",
-            textAlign: "center"
+            textAlign: "left",
+            paddingLeft: "10px" 
           }}>
-            Разделы документации
+            {t("documentationSections")}
           </div>
 
           <div>
@@ -304,8 +116,12 @@ export default function Docs({ showDocsPanel, onToggleDocsPanel }) {
         </div>
       )}
 
+      {/* Основная часть документации */}
       <div style={{ flex: 1, marginLeft: showDocsPanel ? "0" : "30px", padding: "20px" }}>
-        <h1 style={{ fontSize: "30px", marginBottom: "20px" }}>Документация</h1>
+        <h1 style={{ fontSize: "30px", marginBottom: "20px" }}>
+          {t("documentationTitle")}
+        </h1>
+
         <div style={{
           backgroundColor: "white",
           borderRadius: "12px",
@@ -316,7 +132,12 @@ export default function Docs({ showDocsPanel, onToggleDocsPanel }) {
           <h2 style={{ fontSize: "24px", marginBottom: "15px" }}>
             {sections[activeSection].title}
           </h2>
-          {sections[activeSection].content}
+
+          {/* Контент секции */}
+          {sections[activeSection].content.map((item, idx) => (
+            <SectionItem key={idx} title={item.title} text={item.text} />
+          ))}
+
         </div>
       </div>
     </div>

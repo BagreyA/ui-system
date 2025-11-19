@@ -1,51 +1,144 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import trashIcon from "../icons/trash.png";
+import Modal from "../components/Modal/Modal.jsx";
+import { getConfigsList, getConfigParams, saveConfig, fetchOverviewSimulation} from "../api/simulation";
 
 export default function Settings() {
-  const [selectedConfig, setSelectedConfig] = useState("");
+  const { t } = useTranslation("docs");
+  const navigate = useNavigate();
+
+  const [movementParams, setMovementParams] = useState({});
+  const [trafficParams, setTrafficParams] = useState({});
+  const [schedulerParams, setSchedulerParams] = useState({});
   const [userCount, setUserCount] = useState(0);
+  const [selectedConfig, setSelectedConfig] = useState("");
   const [selectedMovement, setSelectedMovement] = useState("");
   const [selectedTraffic, setSelectedTraffic] = useState("");
   const [selectedScheduler, setSelectedScheduler] = useState("");
-  const [isConfigOpen, setIsConfigOpen] = useState(false);
-  const [movementParams, setMovementParams] = useState({});
-  const navigate = useNavigate();
 
-  const handleMovementParamChange = (param, value) => {
-    setMovementParams(prev => ({
-      ...prev,
-      [param]: value
-    }));
-  };
+  const [configsList, setConfigsList] = useState([]);
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newConfigName, setNewConfigName] = useState("");
+
+  useEffect(() => {
+    const fetchConfigs = async () => {
+      const list = await getConfigsList(); // пока вернёт пустой массив
+      setConfigsList(list);
+    };
+    fetchConfigs();
+  }, []);
+
 
   const configurations = [
-    "Конфигурация по умолчанию",
-    "Высокая нагрузка",
-    "Низкая задержка",
-    "Максимальная пропускная способность",
-    "Сбалансированная"
+    t("settings.config.default"),
+    t("settings.config.highLoad"),
+    t("settings.config.lowLatency"),
+    t("settings.config.maxThroughput"),
+    t("settings.config.balanced")
   ];
 
-  const movementModels = [
-    "Random Walk Model",
-    "Random Waypoint Model",
-    "Random Direction Model",
-    "Gauss Markov Model"
-  ];
+ const movementModels = [
+  { key: "randomWalk", label: t("settings.movement.randomWalk") },
+  { key: "randomWaypoint", label: t("settings.movement.randomWaypoint") },
+  { key: "randomDirection", label: t("settings.movement.randomDirection") },
+  { key: "gaussMarkov", label: t("settings.movement.gaussMarkov") }
+];
 
-  const trafficModels = [
-    "Poisson Model",
-    "On Off Model",
-    "MMPP Model"
+  const trafficModelsKeys = [
+    { key: "poisson", label: t("settings.traffic.poisson") },
+    { key: "onOff", label: t("settings.traffic.onOff") },
+    { key: "mmpp", label: t("settings.traffic.mmpp") }
   ];
 
   const schedulers = [
-    "Round Robin",
-    "BestCQI",
-    "ProportionalFair"
+    t("settings.schedulerOptions.roundRobin"),
+    t("settings.schedulerOptions.bestCQI"),
+    t("settings.schedulerOptions.proportionalFair")
   ];
 
+  const handleLoadConfig = () => {
+    if (selectedConfig) {
+      console.log(t("loadConfig") + ": " + selectedConfig);
+      handleLoadSelectedConfig();
+    }
+  };
+
+
+    const handleMovementParamChange = (param, value) =>
+      setMovementParams(prev => ({ ...prev, [param]: value }));
+    const handleTrafficParamChange = (param, value) =>
+      setTrafficParams(prev => ({ ...prev, [param]: value }));
+    const handleSchedulerParamChange = (param, value) =>
+      setSchedulerParams(prev => ({ ...prev, [param]: value }));
+
+  const increaseUsers = () => setUserCount(prev => prev + 1);
+  const decreaseUsers = () => setUserCount(prev => (prev > 0 ? prev - 1 : 0));
+
+  // --- Выбор конфигурации ---
+  const handleConfigSelect = (config) => {
+    setSelectedConfig(config);
+    setIsConfigOpen(false);
+  };
+
+  const handleLoadSelectedConfig = async () => {
+    if (!selectedConfig) return;
+
+    // Пока мок
+    const params = await fetchOverviewSimulation();
+
+    setMovementParams(params.movement || {});
+    setTrafficParams(params.traffic || {});
+    setSchedulerParams(params.scheduler || {});
+    setUserCount(params.userCount || 0);
+    setSelectedMovement(params.selectedMovement || "");
+    setSelectedTraffic(params.selectedTraffic || "");
+    setSelectedScheduler(params.selectedScheduler || "");
+  };
+
+  // --- Сохранение текущей конфигурации ---
+  const handleSaveCurrentConfig = async (configName) => {
+    if (!configName) return;
+
+    const paramsToSave = {
+      movement: movementParams,
+      traffic: trafficParams,
+      scheduler: schedulerParams,
+      userCount,
+      selectedMovement,
+      selectedTraffic,
+      selectedScheduler
+    };
+
+    const result = await saveConfig(configName, paramsToSave);
+    if (result?.status === "ok") {
+      alert("Конфигурация сохранена!");
+      // Обновляем локальный список конфигураций
+      if (!configsList.includes(configName)) {
+        setConfigsList([...configsList, configName]);
+      }
+    } else {
+      alert("Ошибка сохранения конфигурации");
+    }
+  };
+
+  // --- Создание новой конфигурации через модалку ---
+  const handleCreateConfig = () => setIsModalOpen(true);
+
+  const handleConfirmCreate = async () => {
+    if (!newConfigName) return;
+
+    await handleSaveCurrentConfig(newConfigName);
+
+    setSelectedConfig(newConfigName);
+    setNewConfigName("");
+    setIsModalOpen(false);
+  };
+
+  // --- Передача параметров во вкладку графиков ---
   const handleStartSimulation = () => {
     if (
       selectedConfig &&
@@ -54,42 +147,24 @@ export default function Settings() {
       selectedTraffic &&
       selectedScheduler
     ) {
-      console.log("Запуск симуляции с параметрами:", {
-        config: selectedConfig,
-        users: userCount,
-        movement: selectedMovement,
-        traffic: selectedTraffic,
-        scheduler: selectedScheduler
-      });
-      navigate("/visualization");
+      const simulationParams = {
+        movement: movementParams,
+        traffic: trafficParams,
+        scheduler: schedulerParams,
+        userCount,
+        selectedMovement,
+        selectedTraffic,
+        selectedScheduler
+      };
+
+      navigate("/visualization", { state: { simulationParams } });
     }
-  };
-
-  const increaseUsers = () => setUserCount(prev => prev + 1);
-  const decreaseUsers = () => setUserCount(prev => (prev > 0 ? prev - 1 : 0));
-
-  const handleLoadConfig = () => {
-    if (selectedConfig) {
-      console.log(`Загрузка конфигурации: ${selectedConfig}`);
-      // Логика загрузки конфигурации
-    }
-  };
-
-  const handleConfigSelect = (config) => {
-    setSelectedConfig(config);
-    setIsConfigOpen(false);
   };
 
   return (
     <div style={{ marginLeft: "30px" }}>
-      <h1 style={{
-          fontSize: "30px",
-          fontFamily: "sans-serif",
-          color: "#222933",
-          marginBottom: "20px"
-        }}
-      >
-        Основные настройки
+      <h1 style={{ fontSize: "30px", fontFamily: "sans-serif", color: "#222933", marginBottom: "20px" }}>
+        {t("settings.title")}
       </h1>
 
       {/* Контейнер с двумя столбиками */}
@@ -106,23 +181,11 @@ export default function Settings() {
         <div>
           {/* Список сохранённых конфигураций */}
           <div style={{ marginBottom: "30px" }}>
-            <h3 style={{
-                fontSize: "15px",
-                fontFamily: "sans-serif",
-                color: "#2A3D4C",
-                marginBottom: "8px"
-              }}
-            >
-              Список сохранённых конфигураций
+            <h3 style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", marginBottom: "8px" }}>
+              {t("settings.savedConfigs")}
             </h3>
 
-            <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "15px",
-                marginBottom: "15px"
-              }}
-            >
+              <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "15px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0", flex: 1 }}>
                 {/* Плашка выбора конфигурации */}
                 <div style={{ position: "relative" }}>
@@ -144,7 +207,7 @@ export default function Settings() {
                       height: "21px"
                     }}
                   >
-                    <span>{selectedConfig || "Выберите конфигурацию"}</span>
+                    <span>{selectedConfig || t("settings.selectConfig")}</span>
                     <span style={{
                         width: 0,
                         height: 0,
@@ -224,7 +287,7 @@ export default function Settings() {
                   }}
                   disabled={!selectedConfig}
                 >
-                  Загрузить
+                  {t("settings.loadConfig")}
                 </button>
               </div>
             </div>
@@ -240,7 +303,7 @@ export default function Settings() {
                   margin: 0
                 }}
               >
-                Пользовательское устройство
+                {t("settings.userDevice")}
               </h3>
 
             {/* Контейнер с кнопками и количеством */}
@@ -309,7 +372,7 @@ export default function Settings() {
                 marginLeft: "245px"
               }}
             >
-              кол-во устройств
+              {t("settings.userId")}
             </span>
 
           {/* Всплывающие блоки для уникальных идентификаторов (до 5 пользователей) */}
@@ -329,7 +392,7 @@ export default function Settings() {
                     fontFamily: "sans-serif"
                   }}
                 >
-                  Уникальный идентификатор пользователя {i + 1}
+                  {t("settings.userCount")} {i + 1}
                 </span>
                 <input type="text"
                   placeholder={`ID ${i + 1}`}
@@ -363,7 +426,7 @@ export default function Settings() {
                 flexShrink: 0
               }}
             >
-              Модели передвижения абонентов
+              {t("settings.movementModels")}
             </h3>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -383,12 +446,12 @@ export default function Settings() {
                   >
                     <input type="radio"
                       name="movement"
-                      value={model}
-                      checked={selectedMovement === model}
+                      value={model.key}
+                      checked={selectedMovement === model.key}
                       onChange={(e) => setSelectedMovement(e.target.value)}
                       style={{ position: "absolute", opacity: 0, cursor: "pointer", width: "100%", height: "100%" }}
                     />
-                    {selectedMovement === model && (
+                    {selectedMovement === model.key && (
                       <div style={{
                           width: "10px",
                           height: "10px",
@@ -399,7 +462,7 @@ export default function Settings() {
                     )}
                   </div>
                   <span style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C" }}>
-                    {model}
+                    {model.label}
                   </span>
                 </label>
               ))}
@@ -416,7 +479,7 @@ export default function Settings() {
                     margin: 0,
                     minWidth: "200px"
                   }}>
-                    Дополнительные параметры
+                    {t("settings.additionalParams")}
                   </h3>
 
                   {/* Блок X / Y / pause_time */}
@@ -444,7 +507,7 @@ export default function Settings() {
                           justifyContent: "space-between",
                           fontFamily: "sans-serif"
                         }}>
-                          <span style={{ fontSize: "12px", color: "#999" }}>min</span>
+                          <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.min")}</span>
                           <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
                           <input
                             type="number"
@@ -478,7 +541,7 @@ export default function Settings() {
                           justifyContent: "space-between",
                           fontFamily: "sans-serif"
                         }}>
-                          <span style={{ fontSize: "12px", color: "#999" }}>max</span>
+                          <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.max")}</span>
                           <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
                           <input
                             type="number"
@@ -522,7 +585,7 @@ export default function Settings() {
                           justifyContent: "space-between",
                           fontFamily: "sans-serif"
                         }}>
-                          <span style={{ fontSize: "12px", color: "#999" }}>min</span>
+                          <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.min")}</span>
                           <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
                           <input
                             type="number"
@@ -556,7 +619,7 @@ export default function Settings() {
                           justifyContent: "space-between",
                           fontFamily: "sans-serif"
                         }}>
-                          <span style={{ fontSize: "12px", color: "#999" }}>max</span>
+                          <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.max")}</span>
                           <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
                           <input
                             type="number"
@@ -579,8 +642,8 @@ export default function Settings() {
                     </div>
 
                     {/* --- pause_time --- */}
-                    {(selectedMovement === "Random Waypoint Model" || selectedMovement === "Random Direction Model") && (
-                      <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontFamily: "sans-serif" }}>
+                    {(selectedMovement === "randomWaypoint" || selectedMovement === "randomDirection") && (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontFamily: "sans-serif", marginTop: "15px" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                           <span style={{
                             width: "80px",
@@ -589,7 +652,9 @@ export default function Settings() {
                             color: "#222933",
                             fontFamily: "sans-serif",
                             marginTop: "-10px"
-                          }}>паузы:</span>
+                          }}>
+                            {t("settings.pauseTime")}
+                          </span>
                           <div style={{
                             display: "flex",
                             alignItems: "center",
@@ -630,68 +695,72 @@ export default function Settings() {
           {/* Модель трафика */}
           <div style={{ marginBottom: "30px", display: "flex", gap: "20px", alignItems: "flex-start" }}>
             <h3 style={{ width: "220px", fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", margin: 0, flexShrink: 0 }}>
-              Модель трафика
+              {t("settings.trafficModel")}
             </h3>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {trafficModels.map((model, index) => (
-                <label key={index} style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+              {trafficModelsKeys.map(({ key, label }) => (
+                <label key={key} style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
                   <div style={{ width: "18px", height: "18px", borderRadius: "50%", border: "2px solid #00A7C1", marginRight: "6px", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <input type="radio" name="traffic" value={model} checked={selectedTraffic === model} onChange={(e) => setSelectedTraffic(e.target.value)} style={{ position: "absolute", opacity: 0, cursor: "pointer", width: "100%", height: "100%" }} />
-                    {selectedTraffic === model && <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: "#4EC8F0" }} />}
+                    <input
+                      type="radio"
+                      name="traffic"
+                      value={key}
+                      checked={selectedTraffic === key}
+                      onChange={(e) => setSelectedTraffic(e.target.value)}
+                      style={{ position: "absolute", opacity: 0, cursor: "pointer", width: "100%", height: "100%" }}
+                    />
+                    {selectedTraffic === key && <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: "#4EC8F0" }} />}
                   </div>
-                  <span style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C" }}>{model}</span>
+                  <span style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C" }}>{label}</span>
                 </label>
               ))}
             </div>
           </div>
 
-          {/* Блок дополнительных параметров для трафика */}
-          {selectedTraffic && (
+          {/* Блок дополнительных параметров */}
+          {(selectedTraffic === "poisson" || selectedTraffic === "onOff") && (
             <div style={{ marginTop: "15px", marginBottom: "25px" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                {/* Заголовок */}
                 <h3 style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", margin: 0 }}>
-                  Дополнительные параметры трафика
+                  {t("settings.additionalTrafficParams")}
                 </h3>
-
-                {/* Параметры */}
                 <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-                  {selectedTraffic === "Poisson Model" && (
+                  {selectedTraffic === "poisson" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontFamily: "sans-serif" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                         <span style={{ width: "300px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>
-                          Средняя интенсивность трафика:
+                          {t("settings.averageTrafficIntensity")}
                         </span>
                         <div style={{ display: "flex", alignItems: "center", border: "1px solid #d3d3d3", borderRadius: "6px", padding: "4px 8px", width: "110px", justifyContent: "space-between", position: "relative" }}>
                           <input
                             type="number"
-                            value={movementParams.packet_rate || ""}
-                            onChange={(e) => handleMovementParamChange("packet_rate", e.target.value)}
+                            value={trafficParams.packet_rate  || ""}
+                            onChange={(e) => handleTrafficParamChange("packet_rate", e.target.value)}
                             style={{ width: "80px", border: "none", outline: "none", fontSize: "14px", textAlign: "right", fontFamily: "sans-serif" }}
                           />
-                          <span style={{ position: "absolute", right: "8px", color: "#999999", fontSize: "12px" }}>пакет/сек</span>
+                          <span style={{ position: "absolute", right: "8px", color: "#999999", fontSize: "12px" }}>
+                            {t("settings.packetsPerSec")}
+                          </span>
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {selectedTraffic === "On Off Model" && (
+                  {selectedTraffic === "onOff" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontFamily: "sans-serif" }}>
                       {[
-                        { label: "Средняя длительность активной фазы", unit: "сек" },
-                        { label: "Средняя длительность неактивной фазы", unit: "сек" },
-                        { label: "Интенсивность трафика в активной фазе", unit: "пакет/сек" }
-                      ].map(({ label, unit }) => (
-                        <div key={label} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                          <span style={{ width: "300px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>
-                            {label}:
-                          </span>
+                        { key: "averageActivePhaseDuration", label: t("settings.averageActivePhaseDuration"), unit: "сек" },
+                        { key: "averageInactivePhaseDuration", label: t("settings.averageInactivePhaseDuration"), unit: "сек" },
+                        { key: "trafficIntensityActivePhase", label: t("settings.trafficIntensityActivePhase"), unit: t("settings.packetsPerSec") }
+                      ].map(({ key, label, unit }) => (
+                        <div key={key} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <span style={{ width: "300px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>{label}:</span>
                           <div style={{ display: "flex", alignItems: "center", border: "1px solid #d3d3d3", borderRadius: "6px", padding: "4px 8px", width: "110px", justifyContent: "space-between", position: "relative" }}>
                             <input
                               type="number"
-                              value={movementParams[label] || ""}
-                              onChange={(e) => handleMovementParamChange(label, e.target.value)}
+                              value={trafficParams[key] || ""}
+                              onChange={(e) => handleTrafficParamChange(key, e.target.value)}
                               style={{ width: "80px", border: "none", outline: "none", fontSize: "14px", textAlign: "right", fontFamily: "sans-serif" }}
                             />
                             <span style={{ position: "absolute", right: "8px", color: "#999999", fontSize: "12px" }}>{unit}</span>
@@ -708,7 +777,7 @@ export default function Settings() {
           {/* Планировщик */}
           <div style={{ marginBottom: "30px", display: "flex", gap: "20px", alignItems: "flex-start" }}>
             <h3 style={{ width: "220px", fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", margin: 0, flexShrink: 0 }}>
-              Планировщик
+              {t("settings.scheduler")}
             </h3>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -791,7 +860,7 @@ export default function Settings() {
             )
           }
         >
-          Запустить симуляцию
+          {t("settings.startSimulation")}
         </button>
       </div>
 
@@ -803,6 +872,9 @@ export default function Settings() {
           setSelectedMovement("");
           setSelectedTraffic("");
           setSelectedScheduler("");
+          setMovementParams({});
+          setTrafficParams({});
+          setSchedulerParams({});
         }}
         style={{
           position: "fixed",
@@ -826,6 +898,14 @@ export default function Settings() {
       >
         <img src={trashIcon} alt="Очистить" style={{ width: "24px", height: "24px" }} />
       </button>
+      <Modal
+        isOpen={isModalOpen}
+        title={t("settings.enterConfigName")}
+        value={newConfigName}
+        onChange={setNewConfigName}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmCreate}
+      />
     </div>
   );
 }

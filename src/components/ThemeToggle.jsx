@@ -1,14 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
-import SunIcon from "../icons/moon.png";
-import MoonIcon from "../icons/sun.png";
+import SunIcon from "../icons/sun.png"; // светлая тема
+import MoonIcon from "../icons/moon.png"; // тёмная тема
 
 export default function ThemeToggle() {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
+  const { i18n } = useTranslation();
 
-  const toggleTheme = () => {
-    setIsDarkTheme(!isDarkTheme);
-  };
+  useEffect(() => {
+    document.body.setAttribute("data-theme", isDarkTheme ? "dark" : "light");
+  }, [isDarkTheme]);
+
+  const toggleTheme = () => setIsDarkTheme(!isDarkTheme);
+  const toggleLanguage = () => i18n.changeLanguage(i18n.language === "ru" ? "en" : "ru");
 
   return (
     <div style={{
@@ -21,7 +26,7 @@ export default function ThemeToggle() {
       zIndex: 1000
     }}>
       {/* Переключатель темы */}
-      <button 
+      <button
         onClick={toggleTheme}
         style={{
           cursor: "pointer",
@@ -33,24 +38,25 @@ export default function ThemeToggle() {
           justifyContent: "center"
         }}
       >
-        <img 
+        <img
           src={isDarkTheme ? SunIcon : MoonIcon}
-          alt={isDarkTheme ? "Светлая тема" : "Темная тема"}
+          alt={isDarkTheme ? "Светлая тема" : "Тёмная тема"}
           width="24"
           height="24"
         />
       </button>
-      
-      {/* Смена языка */}
-      <div 
+
+      {/* Переключение языка */}
+      <div
+        onClick={toggleLanguage}
         style={{
           fontSize: "16px",
           cursor: "pointer",
           fontFamily: "sans-serif",
-          color: isDarkTheme ? "white" : "#222933"
+          color: isDarkTheme ? "#f8f9fa" : "#222933"
         }}
       >
-        ru
+        {i18n.language.toUpperCase()}
       </div>
     </div>
   );

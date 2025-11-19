@@ -1,0 +1,167 @@
+{
+  "documentationTitle": "Documentation",
+  "documentationSections": "Documentation Sections",
+  "sections": {
+    "graphs": {
+      "title": "Graphs and Metrics Settings",
+      "content": [
+        {
+          "title": "",
+          "text": "Welcome to the page explaining the visualization and simulation metrics parameters. Here you will find descriptions of all secondary settings that can be changed on the graphs page to analyze the LTE network performance results."
+        }
+      ]
+    },
+    "simulation": {
+      "title": "Simulation Parameters",
+      "subItems": ["Simulation Duration", "Num Frames", "Update Interval", "Num Users"],
+      "content": [
+        { "title": "Simulation Duration (ms)", "text": "The total duration of the simulation in milliseconds." },
+        { "title": "Num Frames", "text": "The number of frames for the simulation." },
+        { "title": "Update Interval (ms)", "text": "The data update interval in milliseconds." },
+        { "title": "Num Users", "text": "The number of users in the simulation." }
+      ]
+    },
+    "users": {
+      "title": "User Equipment (UE) Parameters",
+      "subItems": ["Speed/Pause/Alpha", "x, y coordinates", "UE Class", "Buffer Size"],
+      "content": [
+        { "title": "Speed/Pause/Alpha", "text": "User mobility parameters: movement speed, pause time, alpha coefficient." },
+        { "title": "x, y – current user coordinates", "text": "The current coordinates of the user equipment on the simulation map." },
+        { "title": "UE Class", "text": "The class of the user equipment." },
+        { "title": "Buffer Size", "text": "The buffer size of the user equipment." }
+      ]
+    },
+    "traffic": {
+      "title": "Traffic Parameters",
+      "subItems": ["PoissonModel", "OnOffModel"],
+      "content": [
+        { "title": "PoissonModel", "text": "Poisson traffic model:\n- packet_rate - packet intensity\n- min_packet_size - minimum packet size\n- max_packet_size - maximum packet size" },
+        { "title": "OnOffModel", "text": "On/Off traffic model:\n- duration_on - duration of the active phase\n- duration_off - duration of the inactive phase\n- packet_rate - packet intensity during the active phase" }
+      ]
+    },
+    "channel": {
+      "title": "Channel Parameters",
+      "subItems": ["Channel Model"],
+      "content": [
+        { "title": "Channel Model", "text": "Section with channel transmission parameters. Channel transmission model." }
+      ]
+    },
+    "enodeb": {
+      "title": "Base Station (eNodeB)",
+      "subItems": ["eNodeB Configuration"],
+      "content": [
+        { "title": "eNodeB Configuration", "text": "LTE base station parameters. Base station configuration." }
+      ]
+    },
+    "scheduler": {
+      "title": "Scheduler",
+      "subItems": ["Scheduler Type"],
+      "content": [
+        { "title": "Scheduler Type", "text": "Resource scheduling algorithm parameters. Type of scheduler used." }
+      ]
+    }
+  },
+  "home": {
+    "welcome": "Welcome to the LTE Network Simulator!",
+    "description": "Simulate the LTE network operation, resource allocation between users, and analyze key metrics: throughput, fairness, and scheduler efficiency.",
+    "startButton": "Start",
+    "overview": "Overview"
+  },
+
+  "tabs": {
+    "home": "",
+    "settings": "settings",
+    "visualization": "graphs",
+    "tests": "tests",
+    "docs": "docs",
+    "about": "about",
+    "save": "save",
+    "load": "load"
+  },
+    "about": {
+    "title": "Development Team",
+    "text": "This section is still under development and will be completed at the final stage of the project."
+  },
+
+  "title": "Tests",
+  "listTitle": "Test list",
+
+  "list": {
+    "schedulerBuffer": "Scheduler test with buffer",
+    "visualizeTimeline": "LTE timeline visualization test",
+    "schedulerGrid": "Scheduler grid test",
+    "schedulerMetrics": "Scheduler metrics test",
+    "schedulerEfficiency": "Scheduler efficiency test"
+  },
+
+  "runButton": "Run",
+
+  "outputTitle": "Test output",
+  "outputReady": "Ready to run:",
+  "outputSelect": "Select a test to run...",
+  "loading": "Running...",
+  "error": "Error",
+  "errorDefault": "Something went wrong",
+  "noServerData": "No server data received",
+  "runningTest": "Running test...",
+
+  "settings": {
+    "title": "Main Settings",
+    "savedConfigs": "Saved Configurations",
+    "selectConfig": "Select Configuration",
+    "loadConfig": "Download",
+    "userDevice": "User Devices",
+    "userCount": "Unique User ID",
+    "userId": "number of devices",
+    "movementModels": "Subscriber Movement Models",
+    "additionalParams": "Additional Parameters",
+    "min": "min",
+    "max": "max",
+    "pauseTime": "pause:",
+    "trafficModel": "Traffic Model",
+    "additionalTrafficParams": "Additional Traffic Parameters",
+    "averageTrafficIntensity": "Average Traffic Intensity",
+    "packetsPerSec": "packets/sec",
+    "averageActivePhaseDuration": "Average Active Phase Duration",
+    "averageInactivePhaseDuration": "Average Inactive Phase Duration",
+    "trafficIntensityActivePhase": "Traffic Intensity During Active Phase",
+    "scheduler": "Scheduler",
+    "startSimulation": "Start Simulation",
+    "clearParameters": "Clear Parameters",
+    "config": {
+      "default": "Default",
+      "highLoad": "High Load",
+      "lowLatency": "Low Latency",
+      "maxThroughput": "Maximum Throughput",
+      "balanced": "Balanced"
+    },
+    "movement": {
+      "randomWalk": "Random Walk Model",
+      "randomWaypoint": "Random Waypoint Model",
+      "randomDirection": "Random Direction Model",
+      "gaussMarkov": "Gauss-Markov Model"
+    },
+    "traffic": {
+      "poisson": "Poisson Model",
+      "onOff": "On/Off Model",
+      "mmpp": "MMPP Model"
+    },
+    "schedulerOptions": {
+      "roundRobin": "Round Robin",
+      "bestCQI": "Best CQI",
+      "proportionalFair": "Proportional Fair"
+    }
+  },
+    "saveModal": {
+    "title": "Save Configuration",
+    "fileNameLabel": "Enter configuration name",
+    "descriptionLabel": "Description",
+    "saveButton": "Save"
+  },
+  "loadModal": {
+    "title": "Load Configuration",
+    "uploadFileLabel": "Upload a file from your computer",
+    "enterLinkLabel": "Enter a link",
+    "uploadButton": "Load"
+  }
+}

@@ -1,9 +1,12 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 export default function About() {
+  const { t } = useTranslation("docs"); 
+  
   return (
     <div style={{ marginLeft: "30px" }}>
-      <h1 
+      <h1
         style={{
           fontSize: "30px",
           fontFamily: "sans-serif",
@@ -11,9 +14,9 @@ export default function About() {
           marginBottom: "20px"
         }}
       >
-        Команда разработки
+        {t("about.title")}
       </h1>
-      <p 
+      <p
         style={{
           fontSize: "15px",
           fontFamily: "sans-serif",
@@ -21,7 +24,7 @@ export default function About() {
           lineHeight: "1.5"
         }}
       >
-        Раздел пока находится в разработке и будет завершен на завершающем этапе проекта.
+        {t("about.text")}
       </p>
     </div>
   );
