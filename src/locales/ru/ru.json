@@ -135,18 +135,38 @@
       "balanced": "Сбалансированная"
     },
     "movement": {
+      "movementParams": "Параметры передвижения UE",
+      "trafficParams": "Параметры трафика",
+      "schedulerParams": "Параметры планировщика",
+      "ueParams": "Параметры UE",
+      "channelParams": "Параметры канала",
+      "enodebParams": "Параметры базовой станции",
       "randomWalk": "Модель случайного блуждания",
       "randomWaypoint": "Модель случайной точки назначения",
       "randomDirection": "Модель случайного направления",
-      "gaussMarkov": "Модель Гаусса-Маркова"
+      "gaussMarkov": "Модель Гаусса-Маркова",
+      "x": "x:",
+      "y": "y:",
+      "min": "мин",
+      "max": "макс",
+      "pause": "пауза:",
+      "sec": "сек",
+      "alpha": "память:",
+      "boundaryThreshold": "до границы:"
     },
     "traffic": {
       "poisson": "Модель Пуассона",
-     "onOff": "Модель On/Off",
-     "mmpp": "MMPP модель"
+      "onOff": "Модель On/Off",
+      "poissonAvgRate": "Средняя интенсив. трафика",
+      "packetsPerSecond": "пакет/сек",
+      "onAvgOnTime": "Длит. актив. фазы",
+      "onAvgOffTime": "Длит. неакт. фазы",
+      "onPacketRate": "Интенсив. трафика в актив. фазе",
+      "seconds": "сек",
+      "mmpp": "MMPP модель"
     },
     "schedulerOptions": {
-     "roundRobin": "Round Robin",
+     "roundRobin": "Круговая очередь",
      "bestCQI": "Лучшее CQI",
      "proportionalFair": "Пропорционально справедливый"
     }
@@ -162,5 +182,75 @@
     "uploadFileLabel": "Загрузите файл с компьютера",
     "enterLinkLabel": "Введите ссылку",
     "uploadButton": "Загрузить"
+  },
+  "graphs": {
+    "cellThroughput": "Пропускная способность соты",
+    "userThroughput": "Пропускная способность пользователя",
+    "averageUserThroughput": "Средняя пропускная способность пользователя",
+    "fairnessJain": "Индекс справедливости Джайна",
+    "spectralEfficiency": "Спектральная эффективность",
+    "schedulerEfficiency": "Эффективность планировщика",
+    "userMovementMap": "Карта передвижения пользователей",
+    "axisX": "X",
+    "axisY": "Y",
+    "time": "Время",
+    "user": "Пользователь"
+  },
+    "visualization": {
+    "selectGraphs": "Выбор графиков для отображения",
+    "movementParams": "Параметры движения",
+    "schedulerParams": "Параметры планировщика",
+    "ueParams": "Параметры пользовательских устройств",
+    "enodebParams": "Параметры базовой станции",
+    "trafficParams": "Параметры трафика",
+    "ueSection": "Пользовательское устройство",
+    "selectUser": "Выберите пользователя",
+    "coordinates": "координаты:",
+    "x": "x",
+    "y": "y",
+    "meters": "м",
+    "bufferSize": "размер буфера",
+    "bytes": "байт",
+    "ueClass": "класс пользователя",
+    "schedulerSection": "Планировщик",
+    "channelParams": "Параметры канала",
+    "rmaModel": "Модель RMa",
+    "umaModel": "Модель UMa",
+    "umiModel": "Модель UMi",
+    "enodebSection": "Базовая станция",
+    "height": "высота",
+    "frequency_GHz": "частота",
+    "bandwidth_MHz": "полоса пропускания",
+    "GHz": "ГГц",
+    "MHz": "МГц",
+    "updatePeriod": "период обновления",
+    "milliseconds": "мс",
+    "selectModel": "Выберите модель",
+    "o2iModel": "модель O2I",
+    "o2iLow": "низкая",
+    "o2iHigh": "высокая",
+    "buildingType": "застройка",
+    "buildingW": "W",
+    "buildingH": "h"
+  },
+    "users": {
+    "x": "координата X",
+    "y": "координата Y",
+    "bufferSize": "Размер буфера",
+    "ueClass": "Класс устройства"
+  },
+    "channel": {
+    "RMa": "Сельская макросеть",
+    "UMa": "Городская макросеть",
+    "UMi": "Городская микросеть"
+  },
+    "buttons": {
+    "startSimulation": "Запустить симуляцию",
+    "clearParameters": "Сбросить параметры",
+    "save": "Сохранить",
+    "load": "Загрузить"
+  },
+  "mainContent": {
+    "title": "Графики"
   }
 }

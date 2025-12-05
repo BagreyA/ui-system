@@ -1,22 +1,38 @@
-import React, { useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import trashIcon from "../icons/trash.png";
 import Modal from "../components/Modal/Modal.jsx";
+import { useSettings } from "../contexts/SettingsContext";
+
 import { getConfigsList, getConfigParams, saveConfig, fetchOverviewSimulation} from "../api/simulation";
+
+const SettingsContext = createContext();
 
 export default function Settings() {
   const { t } = useTranslation("docs");
   const navigate = useNavigate();
 
-  const [movementParams, setMovementParams] = useState({});
-  const [trafficParams, setTrafficParams] = useState({});
-  const [schedulerParams, setSchedulerParams] = useState({});
-  const [userCount, setUserCount] = useState(0);
-  const [selectedConfig, setSelectedConfig] = useState("");
-  const [selectedMovement, setSelectedMovement] = useState("");
-  const [selectedTraffic, setSelectedTraffic] = useState("");
-  const [selectedScheduler, setSelectedScheduler] = useState("");
+  const {
+    movementParams,
+    setMovementParams,
+    trafficParams,
+    setTrafficParams,
+    schedulerParams,
+    setSchedulerParams,
+    userCount,
+    setUserCount,
+    userIds,
+    setUserIds,
+    selectedMovement,
+    setSelectedMovement,
+    selectedTraffic,
+    setSelectedTraffic,
+    selectedScheduler,
+    setSelectedScheduler,
+    selectedConfig,
+    setSelectedConfig,
+  } = useSettings();
 
   const [configsList, setConfigsList] = useState([]);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
@@ -32,6 +48,13 @@ export default function Settings() {
     fetchConfigs();
   }, []);
 
+    useEffect(() => {
+      setUserIds(prev => {
+        const newIds = [...prev];
+        while (newIds.length < userCount) newIds.push("");
+        return newIds.slice(0, userCount);
+      });
+    }, [userCount]);
 
   const configurations = [
     t("settings.config.default"),
@@ -67,7 +90,6 @@ export default function Settings() {
     }
   };
 
-
     const handleMovementParamChange = (param, value) =>
       setMovementParams(prev => ({ ...prev, [param]: value }));
     const handleTrafficParamChange = (param, value) =>
@@ -77,43 +99,35 @@ export default function Settings() {
 
   const increaseUsers = () => setUserCount(prev => prev + 1);
   const decreaseUsers = () => setUserCount(prev => (prev > 0 ? prev - 1 : 0));
-
+  
   // --- Выбор конфигурации ---
   const handleConfigSelect = (config) => {
     setSelectedConfig(config);
     setIsConfigOpen(false);
   };
 
-  const handleLoadSelectedConfig = async () => {
-    if (!selectedConfig) return;
-
-    // Пока мок
-    const params = await fetchOverviewSimulation();
-
-    setMovementParams(params.movement || {});
-    setTrafficParams(params.traffic || {});
-    setSchedulerParams(params.scheduler || {});
-    setUserCount(params.userCount || 0);
-    setSelectedMovement(params.selectedMovement || "");
-    setSelectedTraffic(params.selectedTraffic || "");
-    setSelectedScheduler(params.selectedScheduler || "");
-  };
-
-  // --- Сохранение текущей конфигурации ---
+    // --- Сохранение текущей конфигурации ---
   const handleSaveCurrentConfig = async (configName) => {
     if (!configName) return;
 
+    // Формируем JSON с правильными ключами
     const paramsToSave = {
-      movement: movementParams,
-      traffic: trafficParams,
-      scheduler: schedulerParams,
+      movementParams,
+      trafficParams,
+      schedulerParams,
       userCount,
+      userIds,
       selectedMovement,
       selectedTraffic,
-      selectedScheduler
+      selectedScheduler,
+      selectedGraphs: [],   // если нужно, можно заполнить по умолчанию
+      channelParams: {},
+      ueParams: {},
+      bsParams: {}
     };
 
     const result = await saveConfig(configName, paramsToSave);
+
     if (result?.status === "ok") {
       alert("Конфигурация сохранена!");
       // Обновляем локальный список конфигураций
@@ -125,14 +139,30 @@ export default function Settings() {
     }
   };
 
+  const handleLoadSelectedConfig = async () => {
+    if (!selectedConfig) return;
+
+    // Загружаем параметры конфигурации
+    const params = await fetchOverviewSimulation(selectedConfig);
+
+    // Устанавливаем все параметры в state
+    setMovementParams(params.movementParams || {});
+    setTrafficParams(params.trafficParams || {});
+    setSchedulerParams(params.schedulerParams || {});
+    setUserCount(params.userCount || 0);
+    setUserIds(params.userIds || []);
+    setSelectedMovement(params.selectedMovement || "");
+    setSelectedTraffic(params.selectedTraffic || "");
+    setSelectedScheduler(params.selectedScheduler || "");
+  };
+
   // --- Создание новой конфигурации через модалку ---
   const handleCreateConfig = () => setIsModalOpen(true);
 
+  // --- Создание новой конфигурации через модалку ---
   const handleConfirmCreate = async () => {
     if (!newConfigName) return;
-
     await handleSaveCurrentConfig(newConfigName);
-
     setSelectedConfig(newConfigName);
     setNewConfigName("");
     setIsModalOpen(false);
@@ -148,10 +178,11 @@ export default function Settings() {
       selectedScheduler
     ) {
       const simulationParams = {
-        movement: movementParams,
-        traffic: trafficParams,
-        scheduler: schedulerParams,
+        movementParams,
+        trafficParams,
+        schedulerParams,
         userCount,
+        userIds,
         selectedMovement,
         selectedTraffic,
         selectedScheduler
@@ -160,6 +191,36 @@ export default function Settings() {
       navigate("/visualization", { state: { simulationParams } });
     }
   };
+
+      // --- Рендер блока ID пользователей ---
+  const renderUserIds = () =>
+    Array.from({ length: Math.min(userCount, 5) }, (_, i) => (
+      <div key={i} style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "10px", width: "fit-content" }}>
+        <span style={{ fontSize: "14px", color: "#222933", fontFamily: "sans-serif" }}>
+          {t("settings.userCount")} {i + 1}
+        </span>
+        <input
+          type="text"
+          placeholder={`ID ${i + 1}`}
+          value={userIds[i] || ""}
+          onChange={(e) => {
+            const newUserIds = [...userIds];
+            newUserIds[i] = e.target.value;
+            setUserIds(newUserIds);
+          }}
+          style={{
+            fontSize: "14px",
+            padding: "4px 6px",
+            border: "1px solid #d3d3d3",
+            borderRadius: "4px",
+            width: "120px",
+            outline: "none"
+          }}
+          onFocus={(e) => (e.target.style.border = "1px solid #00A7C1")}
+          onBlur={(e) => (e.target.style.border = "1px solid #d3d3d3")}
+        />
+      </div>
+    ));
 
   return (
     <div style={{ marginLeft: "30px" }}>
@@ -396,6 +457,12 @@ export default function Settings() {
                 </span>
                 <input type="text"
                   placeholder={`ID ${i + 1}`}
+                  value={userIds[i] || ""}
+                  onChange={(e) => {
+                    const newUserIds = [...userIds];
+                    newUserIds[i] = e.target.value;
+                    setUserIds(newUserIds);
+                  }}
                   style={{
                     fontSize: "14px",
                     padding: "4px 6px",

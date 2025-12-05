@@ -144,6 +144,12 @@
     "traffic": {
       "poisson": "Poisson Model",
       "onOff": "On/Off Model",
+      "poissonAvgRate": "Average traffic rate",
+      "packetsPerSecond": "packets/s",
+      "onAvgOnTime": "Avg. on duration",
+      "onAvgOffTime": "Avg. off duration",
+      "onPacketRate": "Traffic rate in on phase",
+      "seconds": "sec",
       "mmpp": "MMPP Model"
     },
     "schedulerOptions": {
@@ -163,5 +169,99 @@
     "uploadFileLabel": "Upload a file from your computer",
     "enterLinkLabel": "Enter a link",
     "uploadButton": "Load"
+  },
+  "graphs": {
+  "cellThroughput": "Cell Throughput",
+  "userThroughput": "User Throughput",
+  "averageUserThroughput": "Average User Throughput",
+  "fairnessJain": "Fairness Jain Index",
+  "spectralEfficiency": "Spectral Efficiency",
+  "schedulerEfficiency": "Scheduler Efficiency",
+  "userMovementMap": "User Movement Map",
+  "axisX": "X",
+  "axisY": "Y",
+  "time": "Time",
+  "user": "User"
+  },
+
+  "movement": {
+    "movementParams": "UE Movement Parameters",
+    "randomWalk": "Random Walk Model",
+    "randomWaypoint": "Random Waypoint Model",
+    "randomDirection": "Random Direction Model",
+    "gaussMarkov": "Gauss Markov Model",
+    "x": "x:",
+    "y": "y:",
+    "min": "min",
+    "max": "max",
+    "pause": "pause:",
+    "sec": "sec",
+    "alpha": "memory:",
+    "boundaryThreshold": "boundary:"
+  },
+
+  "scheduler": {
+    "roundRobin": "Round Robin",
+    "bestCQI": "Best CQI",
+    "proportionalFair": "Proportional Fair"
+  },
+
+  "visualization": {
+    "selectGraphs": "Select graphs to display",
+    "movementParams": "Movement Parameters",
+    "schedulerParams": "Scheduler Parameters",
+    "ueParams": "User Equipment Parameters",
+    "enodebParams": "Base Station Parameters",
+    "trafficParams": "Traffic Parameters",
+    "ueSection": "User Equipment",
+    "selectUser": "Select a user",
+    "coordinates": "coordinates:",
+    "x": "x",
+    "y": "y",
+    "meters": "m",
+    "bufferSize": "buffer size",
+    "bytes": "bytes",
+    "ueClass": "UE class",
+    "schedulerSection": "Scheduler",
+    "channelParams": "Channel Parameters",
+    "rmaModel": "RMa Model",
+    "umaModel": "UMa Model",
+    "umiModel": "UMi Model",
+    "enodebSection": "Base Station",
+    "height": "height",
+    "frequency_GHz": "frequency",
+    "bandwidth_MHz": "bandwidth",
+    "GHz": "GHz",
+    "MHz": "MHz",
+    "updatePeriod": "update period",
+    "milliseconds": "ms",
+    "selectModel": "Select model",
+    "o2iModel": "O2I model",
+    "o2iHigh": "high",
+    "o2iLow": "low",
+    "buildingType": "building type",
+    "buildingW": "W",
+    "buildingH": "h"
+  },
+  "users": {
+    "x": "X coordinate",
+    "y": "Y coordinate",
+    "bufferSize": "Buffer Size",
+    "ueClass": "UE Class"
+  },
+  "channel": {
+    "RMa": "Rural Macro",
+    "UMa": "Urban Macro",
+    "UMi": "Urban Micro"
+  },
+  "buttons": {
+    "startSimulation": "Start Simulation",
+    "clearParameters": "Clear Parameters",
+    "save": "Save",
+    "load": "Load"
+  },
+  
+  "mainContent": {
+    "title": "Graphs"
   }
 }
