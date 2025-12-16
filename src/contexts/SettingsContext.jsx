@@ -1,4 +1,3 @@
-// src/contexts/SettingsContext.jsx
 import React, { createContext, useContext, useState } from "react";
 
 const SettingsContext = createContext();
