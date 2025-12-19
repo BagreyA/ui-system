@@ -128,13 +128,6 @@
     "scheduler": "Scheduler",
     "startSimulation": "Start Simulation",
     "clearParameters": "Clear Parameters",
-    "config": {
-      "default": "Default",
-      "highLoad": "High Load",
-      "lowLatency": "Low Latency",
-      "maxThroughput": "Maximum Throughput",
-      "balanced": "Balanced"
-    },
     "movement": {
       "randomWalk": "Random Walk Model",
       "randomWaypoint": "Random Waypoint Model",

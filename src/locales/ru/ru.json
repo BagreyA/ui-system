@@ -127,13 +127,6 @@
     "scheduler": "Планировщик",
     "startSimulation": "Запустить симуляцию",
     "clearParameters": "Очистить параметры",
-    "config": {
-      "default": "По умолчанию",
-      "highLoad": "Высокая нагрузка",
-      "lowLatency": "Низкая задержка",
-      "maxThroughput": "Максимальная пропускная способность",
-      "balanced": "Сбалансированная"
-    },
     "movement": {
       "movementParams": "Параметры передвижения UE",
       "trafficParams": "Параметры трафика",
@@ -166,9 +159,9 @@
       "mmpp": "MMPP модель"
     },
     "schedulerOptions": {
-     "roundRobin": "Круговая очередь",
-     "bestCQI": "Лучшее CQI",
-     "proportionalFair": "Пропорционально справедливый"
+      "roundRobin": "Round Robin",
+      "bestCQI": "Best CQI",
+      "proportionalFair": "Proportional Fair"
     }
   },
     "saveModal": {

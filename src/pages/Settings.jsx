@@ -56,12 +56,12 @@ export default function Settings() {
       });
     }, [userCount]);
 
-  const configurations = [
-    t("settings.config.default"),
-    t("settings.config.highLoad"),
-    t("settings.config.lowLatency"),
-    t("settings.config.maxThroughput"),
-    t("settings.config.balanced")
+   const configurations = [
+    "single user static",
+    "multi ue randomwaypoint",
+    "pedestrian mobility stress",
+    "vehicular mobility pf", 
+    "dense network bestcqi"
   ];
 
  const movementModels = [

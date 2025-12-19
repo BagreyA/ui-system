@@ -1,4 +1,4 @@
-import React, { useState, useEffect,  createContext, useContext } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { useSettings } from "../contexts/SettingsContext";
 import Graphs from "../components//Graphs";

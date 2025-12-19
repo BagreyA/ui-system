@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Rnd } from "react-rnd";
 import { useTranslation } from "react-i18next";
+import * as htmlToImage from "html-to-image";
+import { saveAs } from "file-saver";
 
 const graphLabels = {
   cellThroughput: "Cell Throughput",
@@ -24,8 +26,16 @@ async function fetchGraphData(graphName, time, prevHistory = [], userCount = 4) 
   return Array.from({ length: 10 }, (_, i) => ({ x: i * 10, y: Math.random() * 100 }));
 }
 
-function GraphBlock({ name, width, height, data, onResize, time, setTime }) {
+function GraphBlock({ name, width, height, data, onResize }) {
   const { t } = useTranslation("docs");
+  const graphRef = useRef();
+
+  const saveGraphAsImage = () => {
+    if (!graphRef.current) return;
+    htmlToImage.toPng(graphRef.current).then((dataUrl) => {
+      saveAs(dataUrl, `${name}.png`);
+    });
+  };
 
   const paddingTop = 20;
   const paddingBottom = 30;
@@ -34,7 +44,6 @@ function GraphBlock({ name, width, height, data, onResize, time, setTime }) {
   const graphWidth = width - paddingLeft - paddingRight;
   const graphHeight = height - paddingTop - paddingBottom;
   const lineScale = Math.max(1, graphWidth / 250);
-
   const colors = ["#00A7C1", "#FF7F50", "#32CD32", "#FFD700", "#8A2BE2", "#FF1493", "#00CED1", "#FF4500"];
 
   return (
@@ -52,21 +61,22 @@ function GraphBlock({ name, width, height, data, onResize, time, setTime }) {
         position: "absolute",
       }}
     >
-      {/* Заголовок графика */}
-      <div
-        style={{
-          padding: "4px 8px",
-          fontSize: "12px",
-          color: "#222933",
-          borderBottom: "1px solid #d3d3d3",
-          fontFamily: "sans-serif",
-        }}
-      >
-        {t(`graphs.${name}`, name)}
+      {/* Заголовок и иконка сохранения */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 8px", borderBottom: "1px solid #d3d3d3" }}>
+        <span style={{ fontSize: "12px", color:"#222933", fontFamily: "sans-serif" }}>
+          {t(`graphs.${name}`, name)}
+        </span>
+        <span 
+          onClick={saveGraphAsImage} 
+          style={{ cursor: "pointer", fontSize: "16px", userSelect: "none" }}
+          title={t("graphs.saveAsImage", "Сохранить")}
+        >
+          ⭳
+        </span>
       </div>
 
       {/* SVG графика */}
-      <div style={{ flex: 1, position: "relative" }}>
+      <div ref={graphRef} style={{ flex: 1, position: "relative" }}>
         <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
           {/* Сетка */}
           {[...Array(5)].map((_, i) => (
@@ -119,7 +129,7 @@ function GraphBlock({ name, width, height, data, onResize, time, setTime }) {
             fill="#222933"
             fontFamily="sans-serif"
           >
-            {t("graphs.axisX", "X")}
+            {t("graphs.axisX", "x")}
           </text>
           <text
             x={paddingLeft - 15}
@@ -130,7 +140,7 @@ function GraphBlock({ name, width, height, data, onResize, time, setTime }) {
             fontFamily="sans-serif"
             transform={`rotate(-90, ${paddingLeft - 15}, ${paddingTop + graphHeight / 2})`}
           >
-            {t("graphs.axisY", "Y")}
+            {t("graphs.axisY", "y")}
           </text>
 
           {/* Линии графика */}
@@ -141,12 +151,9 @@ function GraphBlock({ name, width, height, data, onResize, time, setTime }) {
                   fill="none"
                   stroke={colors[uIdx % colors.length]}
                   strokeWidth={lineScale}
-                  points={userPoints
-                    .map(
+                  points={userPoints.map(
                       (p) =>
-                        `${paddingLeft + (p.x / 100) * graphWidth},${
-                          paddingTop + graphHeight - (p.y / 100) * graphHeight
-                        }`
+                        `${paddingLeft + (p.x / 100) * graphWidth},${paddingTop + graphHeight - (p.y / 100) * graphHeight}`
                     )
                     .join(" ")}
                 />
@@ -156,12 +163,9 @@ function GraphBlock({ name, width, height, data, onResize, time, setTime }) {
                   fill="none"
                   stroke={colors[0]}
                   strokeWidth={lineScale}
-                  points={data
-                    .map(
+                  points={data.map(
                       (p) =>
-                        `${paddingLeft + (p.x / 100) * graphWidth},${
-                          paddingTop + graphHeight - (p.y / 100) * graphHeight
-                        }`
+                        `${paddingLeft + (p.x / 100) * graphWidth},${paddingTop + graphHeight - (p.y / 100) * graphHeight}`
                     )
                     .join(" ")}
                 />
@@ -183,23 +187,6 @@ function GraphBlock({ name, width, height, data, onResize, time, setTime }) {
             ))}
         </svg>
       </div>
-
-      {/* Ползунок времени для User Throughput */}
-      {name === "userThroughput" && (
-        <div className="no-drag" style={{ display: "flex", alignItems: "center", padding: "2px 8px", fontSize: "12px" }}>
-          <label style={{ marginRight: "8px", fontFamily: "sans-serif" }}>
-            {t("graphs.time", "Время")}: {time}
-          </label>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={time}
-            onChange={(e) => setTime(parseInt(e.target.value))}
-            style={{ flex: 1, height: "6px" }}
-          />
-        </div>
-      )}
     </Rnd>
   );
 }
@@ -223,7 +210,8 @@ export default function Graphs({ selectedGraphs }) {
   }, [time, selectedGraphs]);
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "650px" }}>
+    <div style={{ position: "relative", width: "100%", minHeight: "700px" }}>
+      {/* Графики */}
       {selectedGraphs.map((name, idx) => {
         const width = sizes[idx]?.width || 300;
         const height = sizes[idx]?.height || 180;
@@ -237,11 +225,36 @@ export default function Graphs({ selectedGraphs }) {
             height={height}
             data={data}
             onResize={(size) => setSizes((prev) => ({ ...prev, [idx]: size }))}
-            time={time}
-            setTime={setTime}
           />
         );
       })}
+      {/* Общий ползунок времени */}
+      {selectedGraphs.length > 0 && (
+        <div style={{
+          position: "fixed",
+          bottom: "30px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "70%",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          fontFamily: "sans-serif",
+          padding: "5px 10px",
+          borderRadius: "8px"
+        }}>
+          <label>Время: {time}</label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={time}
+            onChange={(e) => setTime(parseInt(e.target.value))}
+            style={{ flex: 1 }}
+          />
+          <span>{time}</span> {/* отсчёт текущего значения */}
+        </div>
+      )}
     </div>
   );
 }
