@@ -1,13 +1,20 @@
 import axios from "./axios";
 
-// Запуск выбранного теста
-export const runTestRequest = async (testKey) => {
-  const response = await axios.post("/tests/run", { test: testKey });
-  return response.data;
+const TEST_ENDPOINTS = {
+  schedulerBuffer: "/tests/scheduler_with_buffer",
+  visualizeTimeline: "/tests/lte_time_line",
+  schedulerGrid: "/tests/scheduler_grid",
+  schedulerMetrics: "/tests/scheduler_metrics",
+  schedulerEfficiency: "/tests/scheduler_efficiency",
 };
 
-// Получение списка тестов (если backend будет отдавать)
-export const getTestsList = async () => {
-  const response = await axios.get("/tests/list");
+export const runTestRequest = async (testKey) => {
+  const endpoint = TEST_ENDPOINTS[testKey];
+
+  if (!endpoint) {
+    throw new Error("Неизвестный тест");
+  }
+
+  const response = await axios.post(endpoint);
   return response.data;
 };

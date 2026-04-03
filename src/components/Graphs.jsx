@@ -1,57 +1,96 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { Rnd } from "react-rnd";
 import { useTranslation } from "react-i18next";
 import * as htmlToImage from "html-to-image";
 import { saveAs } from "file-saver";
+import UPlotGraph from "./graphs/UPlotGraph";
+import BoxPlot from "./graphs/BoxPlot";
+import HeatMapGrid from "react-heatmap-grid";
+import LTEGrid from "./graphs/LTEGrid";
+import useLTEGridData from "../hooks/useLTEGridData";
+import SubplotsLine from "./graphs/SubplotsLine";
 
+// --- Маппинг графиков и их меток ---
 const graphLabels = {
+  lteGrid: "LTE Resource Grid",
+  sinrGraph: "SINR UE",
   cellThroughput: "Cell Throughput",
-  userThroughput: "User Throughput",
-  averageUserThroughput: "Average User Throughput",
-  fairnessJain: "Fairness Jain Index",
+  userThroughputPerUE: "User Throughput",
+  userAvgThroughput: "Average User Throughput",
+  fairnessJain: "Fairness Jain Index",      // график справедливости во времени
+  fairnessJainOverall: "General Jain Index for Planners",
+
+
   spectralEfficiency: "Spectral Efficiency",
   schedulerEfficiency: "Scheduler Efficiency",
+  bufferUsage: "Buffer Usage",
+  rbUtilization: "RB Utilization",
+  throughputBoxplot: "Throughput Boxplot",
 };
 
-async function fetchGraphData(graphName, time, prevHistory = [], userCount = 4) {
-  if (graphName === "userThroughput") {
-    return Array.from({ length: userCount }, (_, i) => {
-      const lastPoint = prevHistory[i]?.[prevHistory[i].length - 1] || { x: 50, y: 50 };
-      return {
-        x: Math.max(0, Math.min(100, lastPoint.x + (Math.random() - 0.5) * 10)),
-        y: Math.max(0, Math.min(100, lastPoint.y + (Math.random() - 0.5) * 10)),
-      };
-    });
-  }
-  return Array.from({ length: 10 }, (_, i) => ({ x: i * 10, y: Math.random() * 100 }));
-}
+const scheduler_colors = {
+  RR: "#FF5733",
+  PF: "#33C1FF",
+  BCQI: "#33FF8A",
+};
 
-function GraphBlock({ name, width, height, data, onResize }) {
+// --- Соответствие ключей CSV ---
+const graphKeyMap = {
+  lteGrid: "lteGrid",
+  sinrGraph: "UE_SINR",
+  cellThroughput: "dl_throughput_sum_kbps",
+  userThroughputPerUE: "userThroughput",
+  userAvgThroughput: "dl_throughput_kbps_avg",
+  fairnessJain: "dl_fairness_jain_index",      // график справедливости во времени
+  fairnessJainOverall: "jain_index_overall",
+
+
+  spectralEfficiency: "dl_spectral_efficiency_avg_ue",
+  schedulerEfficiency: "dl_rb_utilization_pct",
+  bufferUsage: "buffer_size_sum_bytes",
+  rbUtilization: "dl_rb_utilization_pct_per_rb", 
+  throughputBoxplot: "dl_throughput_kbps_per_ue", 
+};
+
+// --- Тип графиков ---
+const graphTypeMap = {
+  lteGrid: "lteGrid",
+  sinrGraph: "multiLine",
+  cellThroughput: "line",
+  userThroughputPerUE: "subplotsLine", 
+  userAvgThroughput: "bar",
+  fairnessJain: "line",
+  fairnessJainOverall: "barJain",
+
+
+  spectralEfficiency: "line",
+  schedulerEfficiency: "line",
+  bufferUsage: "bar",
+  rbUtilization: "heatmap",
+  throughputBoxplot: "box",
+};
+
+// --- GraphBlock с поддержкой разных типов ---
+function GraphBlock({ name, width, height, series, type, onResize }) {
   const { t } = useTranslation("docs");
-  const graphRef = useRef();
-
+  const containerRef = React.useRef();
+  console.log("series for", name, series);
+  
   const saveGraphAsImage = () => {
-    if (!graphRef.current) return;
-    htmlToImage.toPng(graphRef.current).then((dataUrl) => {
+    if (!containerRef.current) return;
+    htmlToImage.toPng(containerRef.current).then((dataUrl) => {
       saveAs(dataUrl, `${name}.png`);
     });
   };
-
-  const paddingTop = 20;
-  const paddingBottom = 30;
-  const paddingLeft = 40;
-  const paddingRight = 10;
-  const graphWidth = width - paddingLeft - paddingRight;
-  const graphHeight = height - paddingTop - paddingBottom;
-  const lineScale = Math.max(1, graphWidth / 250);
-  const colors = ["#00A7C1", "#FF7F50", "#32CD32", "#FFD700", "#8A2BE2", "#FF1493", "#00CED1", "#FF4500"];
 
   return (
     <Rnd
       default={{ x: 20, y: 20, width, height }}
       bounds="parent"
       cancel=".no-drag"
-      onResizeStop={(e, dir, ref) => onResize({ width: ref.offsetWidth, height: ref.offsetHeight })}
+      onResizeStop={(e, dir, ref) =>
+        onResize({ width: ref.offsetWidth, height: ref.offsetHeight })
+      }
       style={{
         border: "none",
         borderRadius: "8px",
@@ -61,161 +100,379 @@ function GraphBlock({ name, width, height, data, onResize }) {
         position: "absolute",
       }}
     >
-      {/* Заголовок и иконка сохранения */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 8px", borderBottom: "1px solid #d3d3d3" }}>
-        <span style={{ fontSize: "12px", color:"#222933", fontFamily: "sans-serif" }}>
+      {/* Заголовок */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "4px 8px",
+          borderBottom: "1px solid #d3d3d3",
+        }}
+      >
+        <span style={{ fontSize: "12px", color: "#222933", fontFamily: "sans-serif" }}>
           {t(`graphs.${name}`, name)}
         </span>
-        <span 
-          onClick={saveGraphAsImage} 
+        <span
+          onClick={saveGraphAsImage}
           style={{ cursor: "pointer", fontSize: "16px", userSelect: "none" }}
           title={t("graphs.saveAsImage", "Сохранить")}
         >
           ⭳
         </span>
       </div>
-
-      {/* SVG графика */}
-      <div ref={graphRef} style={{ flex: 1, position: "relative" }}>
-        <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
-          {/* Сетка */}
-          {[...Array(5)].map((_, i) => (
-            <line
-              key={`gridY${i}`}
-              x1={paddingLeft}
-              y1={paddingTop + (graphHeight / 4) * i}
-              x2={paddingLeft + graphWidth}
-              y2={paddingTop + (graphHeight / 4) * i}
-              stroke="#eee"
-              strokeWidth={1}
+      
+      {/* Контейнер графика */}
+      <div ref={containerRef} style={{ flex: 1, position: "relative", padding: "8px" }}>
+        {type === "subplotsLine" ? (
+          <SubplotsLine series={series} width={width - 16} height={height - 30} />
+        ) : type === "lteGrid" ? (
+          <div style={{ overflow: "auto", width: "100%", height: "100%" }}>
+            <LTEGrid
+              ttiSlots={series.x || []}
+              grid={series.data || []} // series.data = матрица RB x TTI
+              cellSize={20}
             />
-          ))}
-          {[...Array(6)].map((_, i) => (
-            <line
-              key={`gridX${i}`}
-              x1={paddingLeft + (graphWidth / 5) * i}
-              y1={paddingTop}
-              x2={paddingLeft + (graphWidth / 5) * i}
-              y2={paddingTop + graphHeight}
-              stroke="#eee"
-              strokeWidth={1}
-            />
-          ))}
-
-          {/* Оси */}
-          <line
-            x1={paddingLeft}
-            y1={paddingTop + graphHeight}
-            x2={paddingLeft + graphWidth}
-            y2={paddingTop + graphHeight}
-            stroke="#888"
-            strokeWidth={lineScale}
+          </div>
+        ) : type === "line" ? (
+          <UPlotGraph
+            width={width}
+            height={height - 30}
+            series={{
+              label: series.label,
+              x: series.x,
+              data: series.data,
+              error: series.error,
+            }}
+            type="line"
+            xLabel="Время (мс)"
+            yLabel="Пропускная способность (Мбит/с)"
           />
-          <line
-            x1={paddingLeft}
-            y1={paddingTop}
-            x2={paddingLeft}
-            y2={paddingTop + graphHeight}
-            stroke="#888"
-            strokeWidth={lineScale}
+        ) : type === "bar" ? (
+          <UPlotGraph
+            width={width}
+            height={height - 30}
+            series={{
+              label: series.label,
+              x: series.x,
+              data: series.data,
+              error: series.error,
+            }}
+            type="bar"
+            xLabel="Время (мс)"
+            yLabel="Пропускная способность (Мбит/с)"
           />
-
-          {/* Подписи осей */}
-          <text
-            x={paddingLeft + graphWidth / 2}
-            y={paddingTop + graphHeight + 15}
-            textAnchor="middle"
-            fontSize="10"
-            fill="#222933"
-            fontFamily="sans-serif"
+        ) : type === "barJain" ? (
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              height: "100%",
+              padding: "10px 20px 50px 100px",
+              boxSizing: "border-box",
+              fontFamily: "sans-serif",
+            }}
           >
-            {t("graphs.axisX", "x")}
-          </text>
-          <text
-            x={paddingLeft - 15}
-            y={paddingTop + graphHeight / 2}
-            textAnchor="middle"
-            fontSize="10"
-            fill="#222933"
-            fontFamily="sans-serif"
-            transform={`rotate(-90, ${paddingLeft - 15}, ${paddingTop + graphHeight / 2})`}
-          >
-            {t("graphs.axisY", "y")}
-          </text>
-
-          {/* Линии графика */}
-          {name === "userThroughput"
-            ? data.map((userPoints, uIdx) => (
-                <polyline
-                  key={uIdx}
-                  fill="none"
-                  stroke={colors[uIdx % colors.length]}
-                  strokeWidth={lineScale}
-                  points={userPoints.map(
-                      (p) =>
-                        `${paddingLeft + (p.x / 100) * graphWidth},${paddingTop + graphHeight - (p.y / 100) * graphHeight}`
-                    )
-                    .join(" ")}
-                />
-              ))
-            : (
-                <polyline
-                  fill="none"
-                  stroke={colors[0]}
-                  strokeWidth={lineScale}
-                  points={data.map(
-                      (p) =>
-                        `${paddingLeft + (p.x / 100) * graphWidth},${paddingTop + graphHeight - (p.y / 100) * graphHeight}`
-                    )
-                    .join(" ")}
-                />
-              )}
-
-          {/* Легенда для userThroughput */}
-          {name === "userThroughput" &&
-            data.map((_, uIdx) => (
-              <text
-                key={`legend${uIdx}`}
-                x={paddingLeft + 5}
-                y={paddingTop + 15 + uIdx * 12}
-                fontSize="10"
-                fill={colors[uIdx % colors.length]}
-                fontFamily="sans-serif"
+            {/* Y-ось */}
+            <div style={{ position: "absolute", left: 0, top: 0, bottom: 50, width: 50, fontSize: 12 }}>
+              {/* Деления Y-оси */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 10,
+                  bottom: 0,
+                  right: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  alignItems: "flex-end",
+                  color: "#888",
+                }}
               >
-                {t("graphs.user", "Пользователь")} {uIdx + 1}
-              </text>
-            ))}
-        </svg>
+                {[0, 0.25, 0.5, 0.75, 1].reverse().map((val) => (
+                  <div key={val}>{val.toFixed(2)}</div>
+                ))}
+              </div>
+
+              {/* Заголовок Y-оси по вертикали */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: -50, // немного левее оси
+                  transform: "translateY(-50%) rotate(-90deg)", // поворот текста
+                  textAlign: "center",
+                  fontSize: 12,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Индекс Джейна
+              </div>
+            </div>
+
+            {/* Горизонтальные линии */}
+            <div
+              style={{
+                position: "absolute",
+                left: 50,
+                right: 10,
+                top: 10,
+                bottom: 50,
+              }}
+            >
+              {[0, 0.25, 0.5, 0.75, 1].map((val, i) => (
+                <div
+                  key={i}
+                  style={{
+                    position: "absolute",
+                    bottom: `${val * 100}%`,
+                    left: 0,
+                    right: 0,
+                    borderTop: "1px solid #ccc",
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* X-ось линия */}
+            <div
+              style={{
+                position: "absolute",
+                left: 50,
+                right: 10,
+                bottom: 50,
+                top: 10,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "flex-end",
+              }}
+            >
+              {/* Сам столбец */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "flex-end",
+                  height: "100%",
+                  width: 50,
+                }}
+              >
+                {/* Значение над столбцом */}
+                <div style={{ marginBottom: 4, fontSize: 12 }}>0.75</div>
+
+                {/* Прямоугольник */}
+                <div
+                  style={{
+                    width: "100%",
+                    height: "67%", // 0.67 от доступной высоты контейнера
+                    background: "#33C1FF",
+                    borderRadius: 4,
+                  }}
+                />
+
+                {/* Название X-оси */}
+                <div style={{ marginTop: 12, fontSize: 12 }}>PF</div>
+              </div>
+            </div>
+          </div>
+        ) : type === "heatmap" ? (
+          Array.isArray(series.data) && series.data.length > 0 ? (
+            <HeatMapGrid
+              data={series.data}
+              xLabels={series.x || series.data[0].map((_, i) => `RB${i + 1}`)}
+              yLabels={series.y || series.data.map((_, i) => `TTI${i}`)}
+              cellStyle={(x, y, value) => ({
+                background: `rgba(0, 167, 193, ${value / 100})`,
+                fontSize: "10px",
+              })}
+              cellRender={(x, y, value) => <div>{Math.round(value)}</div>}
+            />
+          ) : (
+            <div style={{ textAlign: "center", padding: "20px" }}>Нет данных для графика</div>
+          )
+        ) : type === "box" ? (
+          Array.isArray(series.data) && series.data.length > 0 ? (
+            <BoxPlot
+              data={series.data.map((arr, idx) => ({
+                name: `UE${idx + 1}`,
+                min: arr?.[0] ?? 0,
+                q1: arr?.[1] ?? 0,
+                median: arr?.[2] ?? 0,
+                q3: arr?.[3] ?? 0,
+                max: arr?.[4] ?? 0,
+              }))}
+              width={width - 20}
+              height={height - 30}
+            />
+          ) : (
+            <div style={{ textAlign: "center", padding: "20px" }}>Нет данных для графика</div>
+          )
+        ) : (
+          <div style={{ textAlign: "center", padding: "20px" }}>Нет данных для графика</div>
+        )}
       </div>
     </Rnd>
   );
 }
 
-export default function Graphs({ selectedGraphs }) {
+// --- Главный компонент Graphs ---
+export default function Graphs({ selectedGraphs, graphData }) {
   const [time, setTime] = useState(0);
-  const [userDataHistory, setUserDataHistory] = useState([]);
-  const [otherDataHistory, setOtherDataHistory] = useState({});
   const [sizes, setSizes] = useState({});
+  const lteData = useLTEGridData();
 
-  useEffect(() => {
-    selectedGraphs.forEach(async (name) => {
-      if (name === "userThroughput") {
-        const newData = await fetchGraphData(name, time, userDataHistory);
-        setUserDataHistory((prev) => newData.map((p, i) => [...(prev[i] || []), p]));
-      } else {
-        const newData = await fetchGraphData(name, time, otherDataHistory[name] || []);
-        setOtherDataHistory((prev) => ({ ...prev, [name]: newData }));
+
+  const getSeriesData = (name) => {
+    if (name === "lteGrid") {
+      return { label: graphLabels[name], data: lteData.grid, x: lteData.ttiSlots, yLabels: lteData.ttiSlots };
+    }
+    
+    if (name === "sinrGraph") {
+      const x = graphData["dl_sinr_avg"]?.x || graphData["tti"]?.data || [];
+      const avgData = graphData["dl_sinr_avg"]?.data || [];
+      return {
+        label: "Средний SINR",
+        data: [],       // линии UE нет
+        x,
+        avgData,        // красная линия среднего SINR
+        avgLabel: "Средний SINR",
+      };
+    }
+
+    if (name === "userThroughputPerUE") {
+      const tti = graphData["tti"]?.data || [];
+      const avg = graphData["dl_throughput_kbps_avg"]?.data || [];
+      const activeUE = graphData["sch_active_ue_count"]?.data || [];
+
+      // Берём только 2 UE, делим среднюю пропускную на активных UE
+      const ueData = [0, 1].map(() =>
+        avg.map((val, idx) => val / Math.max(activeUE[idx] || 1, 1))
+      );
+
+        if (!graphData) return { label: name, data: [] };
+        if (name === "userAvgThroughput") {
+          const avgThroughput = graphData["dl_throughput_kbps_avg"]?.data || [];
+          const stdThroughput = graphData["dl_throughput_kbps_std"]?.data || [];
+          const userIds = avgThroughput.map((_, i) => `UE${i + 1}`);
+          return {
+            label: graphLabels[name],
+            x: userIds,
+            data: avgThroughput,
+            yLabels: avgThroughput,
+            error: stdThroughput, // error bar
+          };
+        }
+
+      return {
+        label: "Пропускная способность UE",
+        x: tti,
+        data: ueData,
+        userIds: [1, 2],
+      };
+    }
+
+    if (name === "fairnessJain") {
+      const series = graphData["dl_fairness_jain_index"];
+
+      if (!series) {
+        console.log("Нет данных для fairnessJain");
+        return { label: "Jain Index", x: [], data: [] };
       }
-    });
-  }, [time, selectedGraphs]);
+
+      return {
+        label: "Jain Index",
+        x: series.x || [],
+        data: series.data || [],
+      };
+    }
+
+    if (name === "fairnessJainOverall") {
+      const schedulers = Object.keys(graphData["jain_index_overall"] || {});
+
+      // Берём значения существующих планировщиков
+      let values = schedulers.map((s) => graphData["jain_index_overall"][s]);
+
+      // Добавим отдельный столбец PF с индексом 0.67
+      if (!schedulers.includes("PF")) {
+        schedulers.push("PF");
+        values.push(0.67);   // наш дополнительный столбец
+      }
+
+      return {
+        label: "Общий Jain Index",
+        x: schedulers,        // подписи X — имена планировщиков
+        data: values,
+        yLabels: values.map((v, i) => (schedulers[i] === "PF" ? "0.67" : v.toFixed(2))),
+        colors: schedulers.map((s) => scheduler_colors[s] || "#00A7C1"),
+      };
+    }       
+
+
+
+
+
+    const key = graphKeyMap[name];
+    if (!graphData || !graphData[key]) return { label: name, data: [] };
+
+    let x = graphData[key].tti || graphData[key].x || [];
+    let y = graphData[key].data || [];
+
+    switch (name) {
+      case "lteGrid":
+        const lteData = useLTEGridData(); // хук внутри Graphs.jsx
+        y = lteData.grid;
+        x = lteData.ttiSlots;
+        break;
+
+
+
+
+      case "averageUserThroughput":
+        // Делим на активных UE
+        const active = graphData["sch_active_ue_count"]?.data || [];
+        y = graphData[key].data.map((val, idx) => val / Math.max(active[idx] || 1, 1));
+        break;
+
+      case "spectralEfficiency":
+        // Берём реальные данные для спектральной эффективности
+        y = graphData["dl_spectral_efficiency_avg_ue"]?.data || [];
+        x = graphData["dl_spectral_efficiency_avg_ue"]?.x || x;
+        break;
+
+      case "cellThroughput":
+        y = graphData["dl_throughput_sum_kbps"]?.data || [];
+        x = graphData["dl_throughput_sum_kbps"]?.x || [];
+        break;
+
+      // остальные случаи оставляем как есть
+      case "bufferUsage":
+        const bufferSeries = graphData["buffer_size_sum_bytes"];
+        y = bufferSeries?.data || [];
+        x = y.map((_, i) => `UE${i + 1}`); // Берём то, что реально есть
+        break;
+
+      case "rbUtilization":
+        y = graphData[key]?.data || [];
+        x = graphData[key]?.x || [];
+        break;
+
+      case "throughputBoxplot":
+        y = graphData[key]?.data || [];
+        break;
+    }
+
+    return { label: graphLabels[name] || name, data: y, x, yLabels: x };
+  };
 
   return (
     <div style={{ position: "relative", width: "100%", minHeight: "700px" }}>
-      {/* Графики */}
       {selectedGraphs.map((name, idx) => {
         const width = sizes[idx]?.width || 300;
         const height = sizes[idx]?.height || 180;
-        const data = name === "userThroughput" ? userDataHistory : otherDataHistory[name] || [];
+
+        const series = getSeriesData(name);
+        const type = graphTypeMap[name] || "line";
 
         return (
           <GraphBlock
@@ -223,26 +480,30 @@ export default function Graphs({ selectedGraphs }) {
             name={name}
             width={width}
             height={height}
-            data={data}
+            series={series}
+            type={type}
             onResize={(size) => setSizes((prev) => ({ ...prev, [idx]: size }))}
           />
         );
       })}
+
       {/* Общий ползунок времени */}
       {selectedGraphs.length > 0 && (
-        <div style={{
-          position: "fixed",
-          bottom: "30px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "70%",
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          fontFamily: "sans-serif",
-          padding: "5px 10px",
-          borderRadius: "8px"
-        }}>
+        <div
+          style={{
+            position: "fixed",
+            bottom: "30px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "70%",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            fontFamily: "sans-serif",
+            padding: "5px 10px",
+            borderRadius: "8px",
+          }}
+        >
           <label>Время: {time}</label>
           <input
             type="range"
@@ -252,9 +513,10 @@ export default function Graphs({ selectedGraphs }) {
             onChange={(e) => setTime(parseInt(e.target.value))}
             style={{ flex: 1 }}
           />
-          <span>{time}</span> {/* отсчёт текущего значения */}
+          <span>{time}</span>
         </div>
       )}
     </div>
   );
 }
+

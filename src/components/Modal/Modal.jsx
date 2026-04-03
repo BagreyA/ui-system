@@ -11,7 +11,7 @@ export default function Modal({
   onClose,
   onConfirm,
 }) {
-  const { t } = useTranslation("docs"); // указываем namespace "docs"
+  const { t } = useTranslation("docs");
   if (!isOpen) return null;
 
   return (

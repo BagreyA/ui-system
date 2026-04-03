@@ -1,25 +1,37 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-const SectionItem = ({ title, text }) => (
+const SectionItem = ({ title, content, text, items }) => (
   <div style={{ marginBottom: "15px" }}>
-    <h3 style={{
-      fontSize: "20px",
-      fontWeight: "bold",
-      color: "#2A3D4C",
-      marginBottom: "8px",
-      fontFamily: "sans-serif"
-    }}>
-      {title}
-    </h3>
-    <p style={{
-      fontSize: "15px",
-      color: "#2A3D4C",
-      lineHeight: "1.5",
-      fontFamily: "sans-serif"
-    }}>
-      {text}
-    </p>
+    {title && (
+      <h3 style={{
+        fontSize: "20px",
+        fontWeight: "bold",
+        color: "#2A3D4C",
+        marginBottom: "8px",
+        fontFamily: "sans-serif"
+      }}>
+        {title}
+      </h3>
+    )}
+
+    {text && (
+      <p style={{ fontSize: "15px", color: "#2A3D4C", lineHeight: "1.5", fontFamily: "sans-serif" }}>
+        {text}
+      </p>
+    )}
+
+    {items && (
+      <ul style={{ paddingLeft: "20px", marginTop: "5px", color: "#2A3D4C" }}>
+        {items.map((item, idx) => (
+          <li key={idx} style={{ marginBottom: "4px" }}>{item}</li>
+        ))}
+      </ul>
+    )}
+
+    {content && content.map((child, idx) => (
+      <SectionItem key={idx} {...child} />
+    ))}
   </div>
 );
 
@@ -27,13 +39,32 @@ export default function Docs({ showDocsPanel }) {
   const { t } = useTranslation("docs");
   const sections = t("sections", { returnObjects: true });
 
-  const [activeSection, setActiveSection] = useState("graphs");
+  const [activeSection, setActiveSection] = useState("interface");
   const [hoveredSection, setHoveredSection] = useState(null);
+
+  const getSubItems = (content) => {
+    if (!content) return [];
+    return content.flatMap(item => {
+      let sub = [];
+      
+      // Рекурсивно обрабатываем subItems
+      if (item.subItems) {
+        sub.push(...item.subItems.flatMap(subItem => [subItem.title, ...getSubItems(subItem.subItems || subItem.content)]));
+      }
+      
+      // Рекурсивно обрабатываем content
+      if (item.content) {
+        sub.push(...getSubItems(item.content));
+      }
+      
+      return sub;
+    });
+  };
 
   const sectionItems = Object.keys(sections).map((key) => ({
     id: key,
     label: sections[key].title,
-    subItems: sections[key].subItems
+    subItems: getSubItems(sections[key].content)
   }));
 
   return (
@@ -116,30 +147,39 @@ export default function Docs({ showDocsPanel }) {
         </div>
       )}
 
-      {/* Основная часть документации */}
-      <div style={{ flex: 1, marginLeft: showDocsPanel ? "0" : "30px", padding: "20px" }}>
-        <h1 style={{ fontSize: "30px", marginBottom: "20px" }}>
-          {t("documentationTitle")}
-        </h1>
+        {/* Основная часть документации */}
+        <div style={{ flex: 1, marginLeft: showDocsPanel ? "0" : "30px", padding: "20px" }}>
+          <h1
+            style={{
+              fontSize: "30px",
+              fontFamily: "sans-serif",
+              color: "#222933",
+              marginTop: "0px",  
+              marginBottom: "20px",
+              marginLeft: "-20px"
+            }}
+          >
+            {t("documentationTitle")}
+          </h1>
+          <div style={{
+            backgroundColor: "white",
+            borderRadius: "12px",
+            padding: "25px",
+            boxShadow: "0 2px 6px #222933",
+            marginBottom: "25px",
+            maxHeight: "550px",
+            overflowY: "auto"
+          }}>
+            <h2 style={{ fontSize: "24px", marginBottom: "15px" }}>
+              {sections[activeSection].title}
+            </h2>
 
-        <div style={{
-          backgroundColor: "white",
-          borderRadius: "12px",
-          padding: "25px",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-          marginBottom: "25px"
-        }}>
-          <h2 style={{ fontSize: "24px", marginBottom: "15px" }}>
-            {sections[activeSection].title}
-          </h2>
-
-          {/* Контент секции */}
-          {sections[activeSection].content.map((item, idx) => (
-            <SectionItem key={idx} title={item.title} text={item.text} />
-          ))}
-
+            {/* Контент секции */}
+            {sections[activeSection].content.map((item, idx) => (
+              <SectionItem key={idx} {...item} />
+            ))}
+          </div>
         </div>
-      </div>
     </div>
   );
 }

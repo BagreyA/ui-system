@@ -5,6 +5,7 @@ import Graphs from "../components//Graphs";
 import trashIcon from "../icons/trash.png";
 import pauseIcon from "../icons/pause.png";
 import refreshIcon from "../icons/refresh.png";
+import useGraphData from "../hooks/useGraphData";
 
 export default function Visualization({ showParamsPanel }) {
   const { t } = useTranslation("docs");
@@ -31,18 +32,23 @@ export default function Visualization({ showParamsPanel }) {
   const [isO2iOpen, setIsO2iOpen] = useState(false);
 
   const movementModels = [
-    { key: "randomWalk", label: t("settings.movement.randomWalk", "Random Walk Model") },
-    { key: "randomWaypoint", label: t("settings.movement.randomWaypoint", "Random Waypoint Model") },
-    { key: "randomDirection", label: t("settings.movement.randomDirection", "Random Direction Model") },
-    { key: "gaussMarkov", label: t("settings.movement.gaussMarkov", "Gauss Markov Model") },
+    { key: "RandomWalk", label: t("settings.movement.RandomWalk", "Random Walk Model") },
+    { key: "RandomWaypoint", label: t("settings.movement.RandomWaypoint", "Random Waypoint Model") },
+    { key: "RandomDirection", label: t("settings.movement.RandomDirection", "Random Direction Model") },
+    { key: "GaussMarkov", label: t("settings.movement.GaussMarkov", "Gauss Markov Model") },
   ];
 
   const trafficModels = [
-    { key: "poisson", label: t("settings.traffic.poisson", "Poisson Model") },
+    { key: "poisson", label: t("settings.traffic.poisson", "PoissonModel") },
     { key: "onOff", label: t("settings.traffic.onOff", "On/Off Model") },
-    { key: "mmpp", label: t("settings.traffic.mmpp", "MMPP Model") },
+    { key: "mmpp", label: t("settings.traffic.mmpp", "MMPPModel") },
   ];
 
+  const trafficPatternMap = {
+    poisson: "PoissonModel",
+    onOff: "OnOffModel",
+    mmpp: "MMPPModel"
+  };
   const schedulers = [
     t("settings.schedulerOptions.roundRobin"),
     t("settings.schedulerOptions.bestCQI"),
@@ -58,6 +64,14 @@ export default function Visualization({ showParamsPanel }) {
     enodeb: true
   });
 
+  const [ueParams, setUeParams] = useState({
+    x: 0,
+    y: 0,
+    buffer_size: 1048576,
+    ue_class: "pedestrian"
+  });
+
+
   const toggleSection = (section) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
@@ -72,11 +86,11 @@ export default function Visualization({ showParamsPanel }) {
     }
     // fallback для старых сохранений без model — ставим ключи, не переведённые строки
     if ("alpha" in movementParams) {
-      setSelectedMovement("gaussMarkov");
+      setSelectedMovement("GaussMarkov");
     } else if ("pause_time" in movementParams) {
-      setSelectedMovement("randomWaypoint");
+      setSelectedMovement("RandomWaypoint");
     } else {
-      setSelectedMovement("randomWalk");
+      setSelectedMovement("RandomWalk");
     }
   }, [movementParams]);
 
@@ -85,14 +99,14 @@ export default function Visualization({ showParamsPanel }) {
 
     let defaultParams = {};
     switch(key) {
-      case "randomWalk":
+      case "RandomWalk":
         defaultParams = { x_min: 0, x_max: 100, y_min: 0, y_max: 100 };
         break;
-      case "randomWaypoint":
-      case "randomDirection":
+      case "RandomWaypoint":
+      case "RandomDirection":
         defaultParams = { x_min: 0, x_max: 100, y_min: 0, y_max: 100, pause_time: 0 };
         break;
-      case "gaussMarkov":
+      case "GaussMarkov":
         defaultParams = { x_min: 0, x_max: 100, y_min: 0, y_max: 100, alpha: 0.75, boundary_threshold: 5 };
         break;
     }
@@ -122,11 +136,11 @@ export default function Visualization({ showParamsPanel }) {
   const [isUsersOpen, setIsUsersOpen] = useState(false);
   const [selectedChannelModel, setSelectedChannelModel] = useState("");
   const [isClassOpen, setIsClassOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState("UE1");
-  const ueList = ["UE1", "UE2", "UE3", "UE4"]; // пока фиксированно
+  const [selectedUser, setSelectedUser] = useState("ID UE");
+  const [ueParamsMap, setUeParamsMap] = useState({});
   
   const toggleGraphSelection = (key) => {
-    setSelectedGraphs(prev => 
+    setSelectedGraphs(prev =>
       prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
     );
   };
@@ -145,9 +159,9 @@ export default function Visualization({ showParamsPanel }) {
     setSelectedTraffic(model);
 
     const defaults = {
-      [t("settings.traffic.poisson", "Poisson Model")]: { packet_rate: 1 },
-      [t("settings.traffic.onOff", "On/Off Model")]: { duration_on: 1, duration_off: 1, packet_rate: 1 },
-      [t("settings.traffic.mmpp", "MMPP Model")]: { lambda0: 1, lambda1: 5, p01: 0.3, p10: 0.2 }
+      [t("settings.traffic.poisson", "PoissonModel")]: { packet_rate: 1 },
+      [t("settings.traffic.onOff", "OnOffModel")]: { duration_on: 1, duration_off: 1, packet_rate: 1 },
+      [t("settings.traffic.mmpp", "MMPPModel")]: { lambda0: 1, lambda1: 5, p01: 0.3, p10: 0.2 }
     }
     setTrafficParams({ [model]: defaults[model] });
   };
@@ -164,14 +178,25 @@ export default function Visualization({ showParamsPanel }) {
     }));
   };
 
+  const graphData = useGraphData();
+
   const graphs = [
+    { key: "lteGrid", name: t("graphs.lteGrid", "LTE Resource Grid (RB × TTI)") },
+    { key: "sinrGraph", name: t("graphs.sinrGraph", "SINR UE") },
     { key: "cellThroughput", name: t("graphs.cellThroughput", "Cell Throughput") },
-    { key: "userThroughput", name: t("graphs.userThroughput", "User Throughput") }, // карта пользователей
-    { key: "averageUserThroughput", name: t("graphs.averageUserThroughput", "Average User Throughput") },
+    { key: "userThroughputPerUE", name: t("graphs.userThroughputPerUE", "User Throughput") },
+    { key: "userAvgThroughput", name: t("graphs.userAvgThroughput", "Average User Throughput") },
     { key: "fairnessJain", name: t("graphs.fairnessJain", "Fairness Jain Index") },
+    { key: "fairnessJainOverall", name: t("graphs.fairnessJainOverall", "General Jain Index for Planners") },
+
+
     { key: "spectralEfficiency", name: t("graphs.spectralEfficiency", "Spectral Efficiency") },
     { key: "schedulerEfficiency", name: t("graphs.schedulerEfficiency", "Scheduler Efficiency") },
+    { key: "bufferUsage", name: t("graphs.bufferUsage", "Buffer Usage") },
+    { key: "rbUtilization", name: t("graphs.rbUtilization", "RB Utilization") },
+    { key: "throughputBoxplot", name: t("graphs.throughputBoxplot", "Throughput Boxplot") },
   ];
+
 
   // Инициализация состояния каналов
   const [channelParams, setChannelParams] = useState({
@@ -194,12 +219,32 @@ export default function Visualization({ showParamsPanel }) {
     }));
   };
 
-  const [ueParams, setUeParams] = useState({
-    x: 0.0,
-    y: 0.0,
-    buffer_size: 1048576,
-    ue_class: "pedestrian"
-  });
+  // Генерируем список UE на основе userCount
+  const ueList = userIds.map((id, index) => id || `UE${index + 1}`);
+  useEffect(() => {
+    if (!selectedUser) return;
+
+    if (!ueParamsMap[selectedUser]) {
+      // Если для нового пользователя нет параметров — создаём дефолтные
+      const defaultParams = { x: 0, y: 0, buffer_size: 1048576, ue_class: "pedestrian" };
+      setUeParamsMap(prev => ({ ...prev, [selectedUser]: defaultParams }));
+      setUeParams(defaultParams);
+    } else {
+      // Подтягиваем существующие параметры пользователя
+      setUeParams(ueParamsMap[selectedUser]);
+    }
+  }, [selectedUser]);
+
+  const handleUeParamChange = (param, value) => {
+    // Локальные изменения
+    setUeParams(prev => ({ ...prev, [param]: value }));
+
+    // Сохраняем в карте всех пользователей
+    setUeParamsMap(prev => ({
+      ...prev,
+      [selectedUser]: { ...prev[selectedUser], [param]: value }
+    }));
+  };
 
   // Для трафика
   const handlePoissonParamChange = (param, value) => {
@@ -296,13 +341,7 @@ export default function Visualization({ showParamsPanel }) {
           </style>
           {/* Выбор графиков (выдвижной список с тегами) */}
           <div style={{ marginBottom: "25px", position: "relative" }}>
-            <h3 style={{
-                fontSize: "15px",
-                fontFamily: "sans-serif",
-                color: "#2A3D4C",
-                marginBottom: "8px"
-              }}
-            >
+            <h3 style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", marginBottom: "8px" }}>
               {t("visualization.selectGraphs", "Выбор графиков для отображения")}
             </h3>
             {/* Контейнер поля и выпадающего списка */}
@@ -338,10 +377,7 @@ export default function Visualization({ showParamsPanel }) {
                     {t(`graphs.${key}`, key)}
                     <span 
                       style={{ marginLeft: "4px", cursor: "pointer", fontWeight: "bold" }}
-                      onClick={(e) => { e.stopPropagation(); toggleGraphSelection(key); }}
-                    >
-                      ×
-                    </span>
+                      onClick={(e) => { e.stopPropagation(); toggleGraphSelection(key); }}>×</span>
                   </div>
                 ))}
                 <span style={{
@@ -582,7 +618,7 @@ export default function Visualization({ showParamsPanel }) {
                   </div>
                 </div>
                 {/* pause_time */}
-                {["randomWaypoint", "randomDirection"].includes(selectedMovement) && (
+                {["RandomWaypoint", "RandomDirection"].includes(selectedMovement) && (
                   <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                     <span style={{ width: "100px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>{t("settings.movement.pause", "pause:")}</span>
                     <div style={{
@@ -771,7 +807,7 @@ export default function Visualization({ showParamsPanel }) {
                                 type="number"
                                 value={trafficParams[selectedTraffic]?.packet_rate || ""}
                                 onChange={(e) => handleTrafficParamChange("packet_rate", parseFloat(e.target.value))}
-                                style={{ width: "80px", border: "none", outline: "none", fontSize: "14px", textAlign: "right", fontFamily: "sans-serif" }}
+                                style={{ width: "80px", border: "none", outline: "none", fontSize: "14px", textAlign: "right", fontFamily: "sans-serif", marginLeft: "-25px" }}
                               />
                               <span style={{ position: "absolute", right: "8px", color: "#999999", fontSize: "12px" }}>
                                 {t("settings.traffic.packetsPerSecond")}
@@ -808,7 +844,7 @@ export default function Visualization({ showParamsPanel }) {
                                   type="number"
                                   value={trafficParams[selectedTraffic]?.[key] || ""}
                                   onChange={(e) => handleTrafficParamChange(key, parseFloat(e.target.value))}
-                                  style={{ width: "80px", border: "none", outline: "none", fontSize: "14px", textAlign: "right", fontFamily: "sans-serif" }}
+                                  style={{ width: "80px", border: "none", outline: "none", fontSize: "14px", textAlign: "right", fontFamily: "sans-serif", marginLeft: unit === "сек" ? "10px" : "-25px" }}
                                 />
                                 <span style={{ position: "absolute", right: "8px", color: "#999999", fontSize: "12px" }}>
                                   {unit}
@@ -905,9 +941,15 @@ export default function Visualization({ showParamsPanel }) {
                           <div
                             key={index}
                             onClick={() => {
+                              // Сохраняем текущие параметры выбранного пользователя в ueParamsMap
+                              setUeParamsMap(prev => ({
+                                ...prev,
+                                [selectedUser]: ueParams
+                              }));
                               setSelectedUser(ue);
                               setIsUsersOpen(false);
                             }}
+
                             style={{
                               padding: "8px 12px",
                               cursor: "pointer",
@@ -970,10 +1012,10 @@ export default function Visualization({ showParamsPanel }) {
                             outline: "none",
                             fontSize: "14px",
                             textAlign: "right",
-                            paddingRight: "4px"
+                            paddingRight: "0px"
                           }}
                         />
-                        <span style={{ color: "#999", fontSize: "12px", marginLeft: "4px" }}>{t("visualization.meters")}</span>
+                        <span style={{ color: "#999", fontSize: "12px", marginLeft: "-10px" }}>{t("visualization.meters")}</span>
                       </div>
                       {/* Y */}
                       <div
@@ -1001,10 +1043,10 @@ export default function Visualization({ showParamsPanel }) {
                             outline: "none",
                             fontSize: "14px",
                             textAlign: "right",
-                            paddingRight: "4px"
+                            paddingRight: "0px"
                           }}
                         />
-                        <span style={{ color: "#999", fontSize: "12px", marginLeft: "4px" }}>{t("visualization.meters")}</span>
+                        <span style={{ color: "#999", fontSize: "12px", marginLeft: "-10px" }}>{t("visualization.meters")}</span>
                       </div>
                     </div>
                   </div>
@@ -1032,7 +1074,7 @@ export default function Visualization({ showParamsPanel }) {
                             outline: "none",
                             fontSize: "14px",
                             textAlign: "right",
-                            paddingRight: "35px"
+                            paddingRight: "0px"
                           }}
                         />  
                         <span style={{ position: "absolute", right: "8px", color: "#999", fontSize: "12px" }}>{t("visualization.bytes", "байт")}</span>
@@ -1253,7 +1295,7 @@ export default function Visualization({ showParamsPanel }) {
                                       borderRadius: "6px",
                                       padding: "4px 8px",
                                       width: "110px",
-                                      justifyContent: "space-between",
+                                      justifyContent: "flex-end",
                                       marginLeft: "10px",
                                       position: "relative"
                                     }}
@@ -1267,7 +1309,7 @@ export default function Visualization({ showParamsPanel }) {
                                           [selectedChannelModel]: { ...prev[selectedChannelModel], [key]: parseFloat(e.target.value) }
                                         }))
                                       }
-                                      style={{ width: "70%", border: "none", outline: "none", fontSize: "14px", textAlign: "right", paddingRight: "26px" }}
+                                      style={{ width: "70%", border: "none", outline: "none", fontSize: "14px", textAlign: "right", paddingRight: "15px" }}
                                     />
                                     <span style={{ position: "absolute", right: "8px", color: "#999", fontSize: "12px" }}>{unit}</span>
                                   </div>
@@ -1401,10 +1443,10 @@ export default function Visualization({ showParamsPanel }) {
                                         outline: "none",
                                         fontSize: "14px",
                                         textAlign: "right",
-                                        paddingRight: "4px"
+                                        paddingRight: "-10px"
                                       }}
                                     />
-                                    <span style={{ color: "#999", fontSize: "12px", marginLeft: "4px" }}>{t("visualization.meters")}</span>
+                                    <span style={{ color: "#999", fontSize: "12px", marginLeft: "-10px" }}>{t("visualization.meters")}</span>
                                   </div>
                                 ))}
                               </div>
@@ -1462,7 +1504,7 @@ export default function Visualization({ showParamsPanel }) {
                               paddingRight: "4px"
                             }}
                           />
-                          <span style={{ color: "#999", fontSize: "12px", marginLeft: "4px" }}>{t("visualization.meters")}</span>
+                          <span style={{ color: "#999", fontSize: "12px", marginLeft: "-15px" }}>{t("visualization.meters")}</span>
                         </div>
                         {/* Y */}
                         <div
@@ -1494,15 +1536,15 @@ export default function Visualization({ showParamsPanel }) {
                               paddingRight: "4px"
                             }}
                           />
-                          <span style={{ color: "#999", fontSize: "12px", marginLeft: "4px" }}>{t("visualization.meters")}</span>
+                          <span style={{ color: "#999", fontSize: "12px", marginLeft: "-15px" }}>{t("visualization.meters")}</span>
                         </div>
                       </div>
                     </div>
                       {/* Остальные параметры БС */}
                       {[
-                        { key: "height", label: t("visualization.height"), unit: t("visualization.meters") },
-                        { key: "frequency_GHz", label: t("visualization.frequency_GHz"), unit: t("visualization.GHz")  },
-                        { key: "bandwidth", label: t("visualization.bandwidth_MHz"), unit: t("visualization.MHz")  }
+                        { key: "height", label: t("visualization.height"), unit: t("visualization.meters"), spacing: 5 },
+                        { key: "frequency_GHz", label: t("visualization.frequency_GHz"), unit: t("visualization.GHz"), spacing: 20 },
+                        { key: "bandwidth", label: t("visualization.bandwidth_MHz"), unit: t("visualization.MHz"), spacing: 20 }
                       ].map(param => (
                         <div key={param.key} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                           <span style={{ width: "119px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>
@@ -1516,7 +1558,7 @@ export default function Visualization({ showParamsPanel }) {
                               borderRadius: "6px",
                               padding: "4px 8px",
                               width: "110px",
-                              justifyContent: "space-between",
+                              justifyContent: "flex-end",
                               marginLeft: "10px",
                               position: "relative"
                             }}
@@ -1528,12 +1570,13 @@ export default function Visualization({ showParamsPanel }) {
                                 setBsParams(prev => ({ ...prev, [param.key]: parseFloat(e.target.value) }))
                               }
                               style={{
-                                width: "70%",
+                                width: "60px",
                                 border: "none",
                                 outline: "none",
                                 fontSize: "14px",
                                 textAlign: "right",
-                                paddingRight: "26px"
+                                paddingRight: `${param.spacing}px`, // разное расстояние к единице
+                                fontFamily: "sans-serif"
                               }}
                             />
                             <span
@@ -1549,7 +1592,6 @@ export default function Visualization({ showParamsPanel }) {
                           </div>
                         </div>
                       ))}
-
                     </>
                   )}
                 </div>
@@ -1558,24 +1600,13 @@ export default function Visualization({ showParamsPanel }) {
           ))}
       </div>
     )}
+
       {/* Основной контент */}
-      <div style={{ 
-        flex: 1, 
-        marginLeft: showParamsPanel ? "0" : "30px",
-        paddingTop: "20px",
-        paddingLeft: "20px"
-      }}>
-        <h1 
-          style={{
-            fontSize: "30px",
-            fontFamily: "sans-serif",
-            color: "#222933",
-            marginBottom: "20px"
-          }}
-        >
+      <div style={{ flex: 1, marginLeft: showParamsPanel ? "0" : "30px", paddingTop: "20px", paddingLeft: "20px" }}>
+        <h1 style={{ fontSize: "30px", marginTop: "0px", fontFamily: "sans-serif", color: "#222933", marginBottom: "20px", marginLeft: "-20px" }}>
           {t("mainContent.title")}
         </h1>
-        <Graphs selectedGraphs={selectedGraphs} />
+        <Graphs selectedGraphs={selectedGraphs} graphData={graphData} />
       </div>
       {/* Кнопки управления */}
       <div style={{ position: "fixed", right: "30px", bottom: "30px", display: "flex", flexDirection: "column", gap: "15px" }}>

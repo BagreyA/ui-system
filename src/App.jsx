@@ -153,7 +153,7 @@ function App() {
                   selectedTraffic={selectedTraffic}
                   setSelectedTraffic={setSelectedTraffic}
                   selectedScheduler={selectedScheduler}
-                  setSelectedScheduler={setSelectedScheduler}
+                  setSelectedScheduler={setSelectedScheduler} // ← тут была ошибка
                   onSaveConfig={handleSaveConfig}
                   onLoadConfig={handleLoadConfig}
                 />

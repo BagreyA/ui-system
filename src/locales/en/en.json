@@ -2,65 +2,330 @@
   "documentationTitle": "Documentation",
   "documentationSections": "Documentation Sections",
   "sections": {
+    "interface": {
+      "title": "Interface Description",
+      "content": [
+        {
+          "title": "1. Home Page",
+          "content": [
+            { "title": "Purpose", "text": "The starting point for the user to work with the simulator." },
+            {
+              "title": "Functionality",
+              "items": [
+                "Start button — navigate to experiment setup and launch.",
+                "Overview button — launch demo scenario for beginners."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "2. Graphs Page",
+          "content": [
+            { "title": "Purpose", "text": "Displays metrics and simulation results." },
+            {
+              "title": "Functions",
+              "items": [
+                "Synchronized scrolling of graphs along the timeline.",
+                "Zooming graphs and selecting displayed metrics.",
+                "Simulation parameter configuration via Navbar (both main and additional).",
+                "Export graphs to PNG for analysis and reporting.",
+                "Pause and restart simulation, clear selected parameters."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "3. Tests Page",
+          "content": [
+            { "title": "Purpose", "text": "Verify correctness of simulator and interface." },
+            {
+              "title": "Functions",
+              "items": [
+                "View logs of completed tests.",
+                "Ability to test correctness of operation.",
+                "Display test status (ready, running, error)."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "4. Settings Page",
+          "content": [
+            { "title": "Purpose", "text": "Manage global interface and simulation parameters." },
+            {
+              "title": "Functions",
+              "items": [
+                "Set number of user devices (UE), their identifiers, and mobility models.",
+                "Configure scheduler and traffic model parameters.",
+                "Manage paths for saving configurations and exported data.",
+                "Modify UE, base station, and channel parameters before simulation start."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "5. Documentation Page",
+          "content": [
+            { "title": "Purpose", "text": "Provide users with reference information about the simulator." },
+            {
+              "title": "Functions",
+              "items": [
+                "Display documentation structure by sections and subsections.",
+                "Detailed descriptions of simulation parameters, graphs, interface, and metrics.",
+                "Interactive navigation between sections."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "6. About Page",
+          "content": [
+            { "title": "Purpose", "text": "Information about the project, development team, and simulator goals." },
+            {
+              "title": "Functions",
+              "items": [
+                "Brief description of the project and its objectives.",
+                "Information about developers and team members.",
+                "Overview of simulator capabilities.",
+                "Links to related materials, publications, or documentation."
+              ]
+            }
+          ]
+        }
+      ]
+    },
     "graphs": {
-      "title": "Graphs and Metrics Settings",
+      "title": "Graphs and Metrics",
       "content": [
         {
           "title": "",
-          "text": "Welcome to the page explaining the visualization and simulation metrics parameters. Here you will find descriptions of all secondary settings that can be changed on the graphs page to analyze the LTE network performance results."
+          "text": "This page presents the main graphs and metrics of the LTE network simulation model. They allow visualizing scheduler performance, evaluating resource allocation, and analyzing user behavior."
+        },
+        {
+          "title": "Metrics and Graphs",
+          "items": [
+            "Cell Throughput: the total number of bits transmitted by all users per unit of time.",
+            "User Throughput: the number of bits transmitted to an individual user over a time interval.",
+            "Jain's Fairness Index: shows the evenness of resource distribution among users (1 — full fairness).",
+            "Spectral Efficiency: the efficiency of frequency spectrum usage, measured in bits/s/Hz.",
+            "User Mobility Map: visualizes user trajectories and analyzes the impact of mobility on connection quality.",
+            "CQI and Channel Conditions: shows channel quality (CQI) and SINR changes for each user.",
+            "Traffic Generation: user activity according to Full Buffer, Bursty Traffic, ON/OFF, and MMPP scenarios.",
+            "Resource Block Allocation (Resource Grid): shows RB allocation to each user in every TTI for RR, PF, and Best CQI schedulers.",
+            "ML Scheduler Results: visualization of machine learning algorithms (e.g., CatBoost) and comparison with baseline schedulers."
+          ]
         }
       ]
     },
     "simulation": {
-      "title": "Simulation Parameters",
-      "subItems": ["Simulation Duration", "Num Frames", "Update Interval", "Num Users"],
+      "title": "Simulation Parameters and Models",
       "content": [
-        { "title": "Simulation Duration (ms)", "text": "The total duration of the simulation in milliseconds." },
-        { "title": "Num Frames", "text": "The number of frames for the simulation." },
-        { "title": "Update Interval (ms)", "text": "The data update interval in milliseconds." },
-        { "title": "Num Users", "text": "The number of users in the simulation." }
+        {
+          "title": "1. Global Simulation Parameters",
+          "text": "These parameters define the overall course of the simulation: when it starts, how long it lasts, how often data is updated, and how many users participate.",
+          "items": [
+            "Simulation Duration (ms) – total duration of the simulation in milliseconds.",
+            "Num Frames – number of frames for the simulation.",
+            "Update Interval (ms) – interval for data updates in milliseconds.",
+            "Num Users – number of users in the simulation."
+          ],
+          "note": "Key point: these parameters control the simulation timeframe and scale but do not define the behavior of individual objects."
+        },
+        {
+          "title": "2. Configurable Model Parameters",
+          "text": "These parameters define the behavior of individual objects within the simulation. They allow the user to flexibly configure each network component: users, base stations, channels, traffic, and schedulers. Using these settings, different LTE network scenarios can be modeled, including user density, environmental characteristics, and load types.",
+          "content": [
+            {
+              "title": "2.1. Mobility Models",
+              "text": "These models describe how and where users move during the simulation. The choice of model affects the spatial distribution of users and network load dynamics.",
+              "items": [
+                "RandomWalkModel — the user moves randomly within defined area boundaries (x_min, x_max, y_min, y_max). Suitable for basic testing.",
+                "RandomWaypointModel — the user selects a random destination, moves to it, pauses (pause_time), and repeats the process.",
+                "GaussMarkovModel — ensures smooth and predictable user movement, controlling parameters α (memory coefficient) and boundary_threshold (boundary limit)."
+              ],
+              "note": "User movement directly affects channel quality, handover frequency between base stations, and scheduler efficiency."
+            },
+            {
+              "title": "2.2. Channel Models",
+              "text": "These models describe signal transmission characteristics between the base station and users, considering obstacles and environmental conditions.",
+              "items": [
+                "RMaModel, UMaModel, UMiModel — different urban or rural scenarios, considering distance, building height, street width, and other factors.",
+                "Model parameters: bs — base station object, height, width — building dimensions, cond_update_period — channel state update frequency."
+              ],
+              "note": "A correct channel model helps evaluate real-world conditions and adapt schedulers to changing circumstances."
+            },
+            {
+              "title": "2.3. Traffic Models",
+              "text": "These models define how data is generated by users, simulating various load scenarios.",
+              "items": [
+                "PoissonModel — packets are generated at a specific rate (packet_rate) with fixed or random sizes.",
+                "OnOffModel — the user alternates between ON and OFF states, transmitting data only in the active phase; state durations and packet frequency are specified."
+              ],
+              "note": "Different traffic types allow testing schedulers under stable and variable loads, highlighting their strengths and weaknesses."
+            },
+            {
+              "title": "2.4. Base Station (BS Module)",
+              "text": "Base station parameters describe its physical location and technical characteristics.",
+              "items": [
+                "x, y — base station coordinates",
+                "height — antenna height",
+                "frequency_GHz — operating frequency",
+                "bandwidth — channel bandwidth",
+                "global_max, per_ue_max — buffer and resource limits"
+              ],
+              "note": "Station position and parameters affect coverage, signal strength, and resource allocation among users."
+            },
+            {
+              "title": "2.5. User Equipment (UE Module)",
+              "text": "These parameters define the characteristics of each user device.",
+              "items": [
+                "UE_ID — unique user identifier",
+                "x, y — initial coordinates",
+                "buffer_size — buffer size for data storage",
+                "ue_class — user type (e.g., pedestrian)"
+              ],
+              "note": "Device differences allow modeling diverse network usage scenarios."
+            },
+            {
+              "title": "2.6. Scheduler",
+              "text": "The scheduler defines the resource allocation strategy among users.",
+              "items": [
+                "Round Robin — equal distribution of resources",
+                "Proportional Fair — balance between efficiency and fairness",
+                "Max C/I — prioritizes users with the best channel quality"
+              ],
+              "note": "The choice of scheduler directly affects throughput, service quality, and fairness in resource allocation."
+            }
+          ]
+        }
       ]
     },
-    "users": {
-      "title": "User Equipment (UE) Parameters",
-      "subItems": ["Speed/Pause/Alpha", "x, y coordinates", "UE Class", "Buffer Size"],
+    "experimentSetup": {
+      "title": "Experiment Setup and Launch Procedure",
       "content": [
-        { "title": "Speed/Pause/Alpha", "text": "User mobility parameters: movement speed, pause time, alpha coefficient." },
-        { "title": "x, y – current user coordinates", "text": "The current coordinates of the user equipment on the simulation map." },
-        { "title": "UE Class", "text": "The class of the user equipment." },
-        { "title": "Buffer Size", "text": "The buffer size of the user equipment." }
+        {
+          "title": "1. Scenario Selection (Optional)",
+          "text": "The user can choose a demonstration scenario for a quick introduction to the simulator. This step is optional — you can proceed directly to parameter configuration.",
+          "items": [
+            "For beginners: click the «Overview» button on the home page to launch a demonstration scenario with preloaded settings.",
+            "For experienced users: you can skip this step and go straight to configuring simulation parameters."
+          ],
+          "note": "Selecting a scenario allows for quick testing of the simulation but does not affect the ability to configure parameters individually."
+        },
+        {
+          "title": "2. Enter Parameters",
+          "text": "The user configures simulation and model parameters, including UE, BS, channel, traffic, and scheduler.",
+          "items": [
+            "User Equipment parameters (number, identifiers, UE class).",
+            "Mobility models (RandomWalk, RandomWaypoint, Gauss-Markov).",
+            "Base Station parameters (coordinates, antenna height, frequency, channel bandwidth).",
+            "Channel parameters (select model: RMa, UMa, UMi).",
+            "Traffic parameters (Poisson, On/Off, MMPP) and intensity.",
+            "Resource scheduler selection (Round Robin, Proportional Fair, Max C/I)."
+          ],
+          "note": "All parameters can be changed before starting the simulation or during runtime for experiments with dynamic scenarios."
+        },
+        {
+          "title": "3. JSON Upload",
+          "text": "If the user wants to use a previously saved configuration, a JSON file with settings can be uploaded.",
+          "items": [
+            "Open the «Load Configuration» modal window.",
+            "Select a file from your computer or enter a JSON link.",
+            "Click «Load» to apply the settings to the simulation."
+          ],
+          "note": "Uploading JSON allows quickly restoring complex settings without manual input."
+        },
+        {
+          "title": "4. Launch Simulation",
+          "text": "After configuring parameters and (optionally) selecting a scenario, you can launch the simulation.",
+          "items": [
+            "Click the «Start Simulation» button on the «Settings» tab.",
+            "Monitor the process in the «Graphs» tab, where charts and metrics are displayed.",
+            "Use the «Pause» or «Clear Parameters» buttons as needed to control the simulation."
+          ],
+          "note": "After the simulation is complete, you can save the configuration and results for further analysis."
+        }
       ]
     },
-    "traffic": {
-      "title": "Traffic Parameters",
-      "subItems": ["PoissonModel", "OnOffModel"],
+    "visualizationModes": {
+      "title": "Visualization and Analysis Modes",
       "content": [
-        { "title": "PoissonModel", "text": "Poisson traffic model:\n- packet_rate - packet intensity\n- min_packet_size - minimum packet size\n- max_packet_size - maximum packet size" },
-        { "title": "OnOffModel", "text": "On/Off traffic model:\n- duration_on - duration of the active phase\n- duration_off - duration of the inactive phase\n- packet_rate - packet intensity during the active phase" }
+        {
+          "title": "1. Multi-Chart Synchronization",
+          "text": "Multiple charts can be displayed simultaneously to compare different metrics or users. Synchronization ensures consistent time axes across charts.",
+          "items": [
+            "Scrolling one chart horizontally updates the time axis on all synchronized charts.",
+            "Zooming or scaling one chart is reflected on all synchronized charts to maintain comparison context."
+          ],
+          "note": "Synchronized charts make it easier to analyze correlations between metrics, such as user throughput and resource allocation."
+        },
+        {
+          "title": "2. Interaction Between Visualizations",
+          "text": "Charts and maps are interactive, allowing users to focus on specific data points or users.",
+          "items": [
+            "Selecting a user on the User Movement Map highlights their data on all related charts.",
+            "Hovering over a metric on a chart displays additional details, such as exact values, timestamps, and related events.",
+            "Users can toggle chart visibility, choose which metrics to display, and compare multiple users or base stations simultaneously."
+          ],
+          "note": "Interactive visualizations help in diagnosing issues, understanding performance patterns, and comparing different simulation scenarios."
+        }
       ]
     },
-    "channel": {
-      "title": "Channel Parameters",
-      "subItems": ["Channel Model"],
+    "configManagement": {
+      "title": "Configuration Save and Load Scenarios",
       "content": [
-        { "title": "Channel Model", "text": "Section with channel transmission parameters. Channel transmission model." }
-      ]
-    },
-    "enodeb": {
-      "title": "Base Station (eNodeB)",
-      "subItems": ["eNodeB Configuration"],
-      "content": [
-        { "title": "eNodeB Configuration", "text": "LTE base station parameters. Base station configuration." }
-      ]
-    },
-    "scheduler": {
-      "title": "Scheduler",
-      "subItems": ["Scheduler Type"],
-      "content": [
-        { "title": "Scheduler Type", "text": "Resource scheduling algorithm parameters. Type of scheduler used." }
+        {
+          "title": "1. Saving Configurations",
+          "text": "Users can save the current simulation settings to a JSON file for later use or sharing.",
+          "items": [
+            "Open the 'Save Configuration' modal window.",
+            "Enter a file name in the 'Enter configuration name' field.",
+            "Add a description in the 'Description' field for easier identification.",
+            "Click 'Save' to create a JSON file with the current simulation settings."
+          ],
+          "note": "Saving configurations allows you to quickly restore settings without manual input."
+        },
+        {
+          "title": "2. Loading Configurations",
+          "text": "To use a previously saved configuration, you can load a JSON file.",
+          "items": [
+            "Open the 'Load Configuration' modal window.",
+            "Select a file from your computer or enter a link to a JSON file.",
+            "Click 'Load' to apply the settings to the simulation."
+          ],
+          "note": "Loading a JSON file allows you to quickly restore complex configurations and reuse them for repeated experiments."
+        },
+        {
+          "title": "3. File Naming Recommendations",
+          "items": [
+            "Use clear names that include a description of the scenario (e.g., \"high_load_scenario.json\").",
+            "Add a date or version to distinguish updated configurations (e.g., \"v1_2025-12-23.json\").",
+            "Avoid spaces and special characters in file names."
+          ]
+        },
+        {
+          "title": "4. Configuration Versioning",
+          "text": "To manage settings effectively, it is recommended to maintain versioned configurations when making changes.",
+          "items": [
+            "Create a new file version with a changed name whenever significant parameters are modified.",
+            "Use version descriptions to explain which parameters were changed.",
+            "Keep all versions to allow rollback to previous settings."
+          ],
+          "note": "Versioning helps track experiments, compare results, and prevent loss of important settings."
+        },
+        {
+          "title": "5. JSON Usage Examples",
+          "items": [
+            "Scenario for testing maximum load: \"max_load_test_v1.json\".",
+            "Scenario with varied UE models: \"mobility_varied_v2.json\".",
+            "Scenario for ML scheduler analysis: \"ml_scheduler_comparison_v1.json\"."
+          ],
+          "note": "Examples help users quickly navigate and create their configurations in a clear structure."
+        }
       ]
     }
   },
+
   "home": {
     "welcome": "Welcome to the LTE Network Simulator!",
     "description": "Simulate the LTE network operation, resource allocation between users, and analyze key metrics: throughput, fairness, and scheduler efficiency.",
@@ -120,7 +385,7 @@
     "pauseTime": "pause:",
     "trafficModel": "Traffic Model",
     "additionalTrafficParams": "Additional Traffic Parameters",
-    "averageTrafficIntensity": "Average Traffic Intensity",
+    "averageTrafficIntensity": "Average Traffic Intensity:",
     "packetsPerSec": "packets/sec",
     "averageActivePhaseDuration": "Average Active Phase Duration",
     "averageInactivePhaseDuration": "Average Inactive Phase Duration",
@@ -129,26 +394,26 @@
     "startSimulation": "Start Simulation",
     "clearParameters": "Clear Parameters",
     "movement": {
-      "randomWalk": "Random Walk Model",
-      "randomWaypoint": "Random Waypoint Model",
-      "randomDirection": "Random Direction Model",
-      "gaussMarkov": "Gauss-Markov Model"
+      "RandomWalk": "Random Walk Model",
+      "RandomWaypoint": "Random Waypoint Model",
+      "RandomDirection": "Random Direction Model",
+      "GaussMarkov": "Gauss-Markov Model"
     },
     "traffic": {
-      "poisson": "Poisson Model",
-      "onOff": "On/Off Model",
+      "poisson": "PoissonModel",
+      "onOff": "OnOffModel",
       "poissonAvgRate": "Average traffic rate",
       "packetsPerSecond": "packets/s",
       "onAvgOnTime": "Avg. on duration",
       "onAvgOffTime": "Avg. off duration",
       "onPacketRate": "Traffic rate in on phase",
       "seconds": "sec",
-      "mmpp": "MMPP Model"
+      "mmpp": "MMPPModel"
     },
     "schedulerOptions": {
-      "roundRobin": "Round Robin",
-      "bestCQI": "Best CQI",
-      "proportionalFair": "Proportional Fair"
+      "roundRobin": "RoundRobin",
+      "bestCQI": "BestCQI",
+      "proportionalFair": "ProportionalFair"
     }
   },
     "saveModal": {
@@ -164,17 +429,24 @@
     "uploadButton": "Load"
   },
   "graphs": {
-  "cellThroughput": "Cell Throughput",
-  "userThroughput": "User Throughput",
-  "averageUserThroughput": "Average User Throughput",
-  "fairnessJain": "Fairness Jain Index",
-  "spectralEfficiency": "Spectral Efficiency",
-  "schedulerEfficiency": "Scheduler Efficiency",
-  "userMovementMap": "User Movement Map",
-  "axisX": "X",
-  "axisY": "Y",
-  "time": "Time",
-  "user": "User"
+    "lteGrid": "LTE Resource Grid (RB × TTI)",
+    "sinrGraph": "SINR UE",
+    "cellThroughput": "Cell Throughput (kbps)",
+    "userThroughputPerUE": "User Throughput per UE (kbps)",
+    "averageCellThroughput": "Average Cell Throughput",
+    "userAvgThroughput": "Average User Throughput",
+    "fairnessJain": "Jain Fairness Index",
+    "fairnessJainOverall": "General Jain Index for Planners",
+    "cellThroughputCompare": "Cell Throughput (Schedulers)",
+    "fairnessCompare": "Jain Index (Schedulers)",
+    "spectralEfficiency": "Spectral Efficiency (bps/Hz)",
+    "throughputBoxplot": "User Throughput Distribution",
+    "schedulerEfficiency": "Scheduler Execution Time (µs)",
+    "userMovementMap": "User Movement Map",
+    "axisX": "X",
+    "axisY": "Y",
+    "time": "Time",
+    "user": "User"
   },
 
   "movement": {
@@ -194,9 +466,9 @@
   },
 
   "scheduler": {
-    "roundRobin": "Round Robin",
-    "bestCQI": "Best CQI",
-    "proportionalFair": "Proportional Fair"
+    "roundRobin": "RoundRobin",
+    "bestCQI": "BestCQI",
+    "proportionalFair": "ProportionalFair"
   },
 
   "visualization": {

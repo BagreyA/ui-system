@@ -65,10 +65,10 @@ export default function Settings() {
   ];
 
  const movementModels = [
-  { key: "randomWalk", label: t("settings.movement.randomWalk") },
-  { key: "randomWaypoint", label: t("settings.movement.randomWaypoint") },
-  { key: "randomDirection", label: t("settings.movement.randomDirection") },
-  { key: "gaussMarkov", label: t("settings.movement.gaussMarkov") }
+  { key: "RandomWalk", label: t("settings.movement.RandomWalk") },
+  { key: "RandomWaypoint", label: t("settings.movement.RandomWaypoint") },
+  { key: "RandomDirection", label: t("settings.movement.RandomDirection") },
+  { key: "GaussMarkov", label: t("settings.movement.GaussMarkov") }
 ];
 
   const trafficModelsKeys = [
@@ -76,6 +76,12 @@ export default function Settings() {
     { key: "onOff", label: t("settings.traffic.onOff") },
     { key: "mmpp", label: t("settings.traffic.mmpp") }
   ];
+  
+  const trafficPatternMap = {
+    poisson: "PoissonModel",
+    onOff: "OnOffModel",
+    mmpp: "MMPPModel"
+  };
 
   const schedulers = [
     t("settings.schedulerOptions.roundRobin"),
@@ -120,7 +126,7 @@ export default function Settings() {
       selectedMovement,
       selectedTraffic,
       selectedScheduler,
-      selectedGraphs: [],   // если нужно, можно заполнить по умолчанию
+      selectedGraphs: [],
       channelParams: {},
       ueParams: {},
       bsParams: {}
@@ -170,31 +176,66 @@ export default function Settings() {
 
   // --- Передача параметров во вкладку графиков ---
   const handleStartSimulation = () => {
+    // Проверка, что пользователь ввёл все обязательные параметры
     if (
-      selectedConfig &&
       userCount > 0 &&
       selectedMovement &&
       selectedTraffic &&
-      selectedScheduler
+      selectedScheduler &&
+      movementParams.x_min !== undefined &&
+      movementParams.x_max !== undefined &&
+      movementParams.y_min !== undefined &&
+      movementParams.y_max !== undefined
     ) {
+      // Формируем объект для POST запроса на бек
       const simulationParams = {
-        movementParams,
-        trafficParams,
-        schedulerParams,
-        userCount,
-        userIds,
-        selectedMovement,
-        selectedTraffic,
-        selectedScheduler
+        ue_cnt: userCount,
+        ue_ids: userIds.map(id => Number(id)), // приводим к числу, если нужно
+        ue_move_pattern: selectedMovement,
+        ue_coords: {
+          x_min: movementParams.x_min,
+          x_max: movementParams.x_max,
+          y_min: movementParams.y_min,
+          y_max: movementParams.y_max,
+        },
+        ue_traffic_pattern: trafficPatternMap[selectedTraffic] || selectedTraffic,
+        ue_pause: movementParams.pause_time || null, // pause_time может быть опциональным
+        bs_scheduler: selectedScheduler,
+        bs_coords: {
+          x: 0, // тут можно добавить input для пользователя, если нужно
+          y: 0
+        },
+        bs_bw_mhz: 10, // дефолтное значение, можно сделать вводом
+        sim_packet_rate: trafficParams.packet_rate || 0 // если нужно, можно заменить
       };
 
-      navigate("/visualization", { state: { simulationParams } });
+      fetch("http://localhost:8000/api/v1/sim/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(simulationParams)
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === "success") {
+            console.log("Simulation started!", data);
+            navigate("/visualization", { state: { simulationParams } });
+          } else {
+            alert("Ошибка запуска симуляции: " + data.data.message);
+          }
+        })
+        .catch(err => {
+          console.error("Ошибка запроса:", err);
+          alert("Не удалось отправить параметры на сервер");
+        });
+
+    } else {
+      alert("Пожалуйста, заполните все обязательные параметры!");
     }
   };
 
-      // --- Рендер блока ID пользователей ---
+  // --- Рендер блока ID пользователей ---
   const renderUserIds = () =>
-    Array.from({ length: Math.min(userCount, 5) }, (_, i) => (
+    Array.from({ length: Math.min(userCount, 200) }, (_, i) => (
       <div key={i} style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "10px", width: "fit-content" }}>
         <span style={{ fontSize: "14px", color: "#222933", fontFamily: "sans-serif" }}>
           {t("settings.userCount")} {i + 1}
@@ -437,7 +478,7 @@ export default function Settings() {
             </span>
 
           {/* Всплывающие блоки для уникальных идентификаторов (до 5 пользователей) */}
-            {Array.from({ length: Math.min(userCount, 5) }, (_, i) => (
+            {Array.from({ length: Math.min(userCount, 200) }, (_, i) => (
               <div key={i}
                 style={{
                   marginTop: "10px",
@@ -709,7 +750,7 @@ export default function Settings() {
                     </div>
 
                     {/* --- pause_time --- */}
-                    {(selectedMovement === "randomWaypoint" || selectedMovement === "randomDirection") && (
+                    {(selectedMovement === "RandomWaypoint" || selectedMovement === "RandomDirection") && (
                       <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontFamily: "sans-serif", marginTop: "15px" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                           <span style={{
@@ -729,7 +770,7 @@ export default function Settings() {
                             borderRadius: "6px",
                             padding: "4px 8px",
                             width: "110px",
-                            justifyContent: "space-between",
+                            justifyContent: "flex-end",
                             fontFamily: "sans-serif"
                           }}>
                             <input
@@ -789,22 +830,22 @@ export default function Settings() {
           {(selectedTraffic === "poisson" || selectedTraffic === "onOff") && (
             <div style={{ marginTop: "15px", marginBottom: "25px" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                <h3 style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", margin: 0 }}>
+                <h3 style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#222933", margin: 0 }}>
                   {t("settings.additionalTrafficParams")}
                 </h3>
-                <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", gap: "30px", flexWrap: "wrap" }}>
                   {selectedTraffic === "poisson" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontFamily: "sans-serif" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                         <span style={{ width: "300px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>
                           {t("settings.averageTrafficIntensity")}
                         </span>
-                        <div style={{ display: "flex", alignItems: "center", border: "1px solid #d3d3d3", borderRadius: "6px", padding: "4px 8px", width: "110px", justifyContent: "space-between", position: "relative" }}>
+                        <div style={{ display: "flex", alignItems: "center", border: "1px solid #d3d3d3", borderRadius: "6px", padding: "4px 8px", width: "110px", justifyContent: "flex-start", position: "relative" }}>
                           <input
                             type="number"
                             value={trafficParams.packet_rate  || ""}
                             onChange={(e) => handleTrafficParamChange("packet_rate", e.target.value)}
-                            style={{ width: "80px", border: "none", outline: "none", fontSize: "14px", textAlign: "right", fontFamily: "sans-serif" }}
+                            style={{ width: "80px", border: "none", outline: "none", fontSize: "14px", textAlign: "right", fontFamily: "sans-serif", marginLeft: "-25px" }}
                           />
                           <span style={{ position: "absolute", right: "8px", color: "#999999", fontSize: "12px" }}>
                             {t("settings.packetsPerSec")}
@@ -821,14 +862,32 @@ export default function Settings() {
                         { key: "averageInactivePhaseDuration", label: t("settings.averageInactivePhaseDuration"), unit: "сек" },
                         { key: "trafficIntensityActivePhase", label: t("settings.trafficIntensityActivePhase"), unit: t("settings.packetsPerSec") }
                       ].map(({ key, label, unit }) => (
-                        <div key={key} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                        <div key={key} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                           <span style={{ width: "300px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>{label}:</span>
-                          <div style={{ display: "flex", alignItems: "center", border: "1px solid #d3d3d3", borderRadius: "6px", padding: "4px 8px", width: "110px", justifyContent: "space-between", position: "relative" }}>
+
+                          <div style={{
+                            display: "flex",
+                            alignItems: "center",
+                            border: "1px solid #d3d3d3",
+                            borderRadius: "6px",
+                            padding: "4px 8px",
+                            width: "110px",
+                            justifyContent: "space-between",
+                            position: "relative"
+                          }}>
                             <input
                               type="number"
                               value={trafficParams[key] || ""}
                               onChange={(e) => handleTrafficParamChange(key, e.target.value)}
-                              style={{ width: "80px", border: "none", outline: "none", fontSize: "14px", textAlign: "right", fontFamily: "sans-serif" }}
+                              style={{
+                                width: "80px",
+                                border: "none",
+                                outline: "none",
+                                fontSize: "14px",
+                                textAlign: "right",
+                                fontFamily: "sans-serif",
+                                marginLeft: unit === "сек" ? "10px" : "-25px" // <-- разное смещение
+                              }}
                             />
                             <span style={{ position: "absolute", right: "8px", color: "#999999", fontSize: "12px" }}>{unit}</span>
                           </div>
@@ -884,7 +943,6 @@ export default function Settings() {
         <button
           style={{
             backgroundColor:
-              selectedConfig &&
               userCount > 0 &&
               selectedMovement &&
               selectedTraffic &&
@@ -899,7 +957,6 @@ export default function Settings() {
             border: "2px solid white",
             fontFamily: "sans-serif",
             cursor:
-              selectedConfig &&
               userCount > 0 &&
               selectedMovement &&
               selectedTraffic &&
@@ -908,7 +965,6 @@ export default function Settings() {
                 : "not-allowed",
             transition: "background-color 0.2s ease",
             opacity:
-              selectedConfig &&
               userCount > 0 &&
               selectedMovement &&
               selectedTraffic &&
@@ -919,7 +975,6 @@ export default function Settings() {
           onClick={handleStartSimulation}
           disabled={
             !(
-              selectedConfig &&
               userCount > 0 &&
               selectedMovement &&
               selectedTraffic &&
