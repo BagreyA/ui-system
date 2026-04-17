@@ -5,7 +5,7 @@ export default function useLTEGridData() {
   const [gridData, setGridData] = useState({ ttiSlots: [], grid: [] });
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8000/ws/csv_stream"); 
+    const ws = new WebSocket("ws://localhost:8000/api/v1/ws/csv_stream"); 
 
     let csvText = "";
 

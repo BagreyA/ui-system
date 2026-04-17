@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { FiInfo } from "react-icons/fi";
+
 import trashIcon from "../icons/trash.png";
 import Modal from "../components/Modal/Modal.jsx";
 import { useSettings } from "../contexts/SettingsContext";
 
-import { getConfigsList, getConfigParams, saveConfig, fetchOverviewSimulation} from "../api/simulation";
+import { getConfigsList, getConfigParams, saveConfig, fetchOverviewSimulation } from "../api/simulation";
 
 const SettingsContext = createContext();
 
@@ -36,7 +38,7 @@ export default function Settings() {
 
   const [configsList, setConfigsList] = useState([]);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newConfigName, setNewConfigName] = useState("");
 
@@ -48,35 +50,35 @@ export default function Settings() {
     fetchConfigs();
   }, []);
 
-    useEffect(() => {
-      setUserIds(prev => {
-        const newIds = [...prev];
-        while (newIds.length < userCount) newIds.push("");
-        return newIds.slice(0, userCount);
-      });
-    }, [userCount]);
+  useEffect(() => {
+    setUserIds(prev => {
+      const newIds = [...prev];
+      while (newIds.length < userCount) newIds.push("");
+      return newIds.slice(0, userCount);
+    });
+  }, [userCount]);
 
-   const configurations = [
+  const configurations = [
     "single user static",
     "multi ue randomwaypoint",
     "pedestrian mobility stress",
-    "vehicular mobility pf", 
+    "vehicular mobility pf",
     "dense network bestcqi"
   ];
 
- const movementModels = [
-  { key: "RandomWalk", label: t("settings.movement.RandomWalk") },
-  { key: "RandomWaypoint", label: t("settings.movement.RandomWaypoint") },
-  { key: "RandomDirection", label: t("settings.movement.RandomDirection") },
-  { key: "GaussMarkov", label: t("settings.movement.GaussMarkov") }
-];
+  const movementModels = [
+    { key: "RandomWalk", label: t("settings.movement.RandomWalk") },
+    { key: "RandomWaypoint", label: t("settings.movement.RandomWaypoint") },
+    { key: "RandomDirection", label: t("settings.movement.RandomDirection") },
+    { key: "GaussMarkov", label: t("settings.movement.GaussMarkov") }
+  ];
 
   const trafficModelsKeys = [
     { key: "poisson", label: t("settings.traffic.poisson") },
     { key: "onOff", label: t("settings.traffic.onOff") },
     { key: "mmpp", label: t("settings.traffic.mmpp") }
   ];
-  
+
   const trafficPatternMap = {
     poisson: "PoissonModel",
     onOff: "OnOffModel",
@@ -96,23 +98,23 @@ export default function Settings() {
     }
   };
 
-    const handleMovementParamChange = (param, value) =>
-      setMovementParams(prev => ({ ...prev, [param]: value }));
-    const handleTrafficParamChange = (param, value) =>
-      setTrafficParams(prev => ({ ...prev, [param]: value }));
-    const handleSchedulerParamChange = (param, value) =>
-      setSchedulerParams(prev => ({ ...prev, [param]: value }));
+  const handleMovementParamChange = (param, value) =>
+    setMovementParams(prev => ({ ...prev, [param]: value }));
+  const handleTrafficParamChange = (param, value) =>
+    setTrafficParams(prev => ({ ...prev, [param]: value }));
+  const handleSchedulerParamChange = (param, value) =>
+    setSchedulerParams(prev => ({ ...prev, [param]: value }));
 
   const increaseUsers = () => setUserCount(prev => prev + 1);
   const decreaseUsers = () => setUserCount(prev => (prev > 0 ? prev - 1 : 0));
-  
+
   // --- Выбор конфигурации ---
   const handleConfigSelect = (config) => {
     setSelectedConfig(config);
     setIsConfigOpen(false);
   };
 
-    // --- Сохранение текущей конфигурации ---
+  // --- Сохранение текущей конфигурации ---
   const handleSaveCurrentConfig = async (configName) => {
     if (!configName) return;
 
@@ -233,6 +235,12 @@ export default function Settings() {
     }
   };
 
+  const isValidUserId = (val) => {
+    if (val === "") return true; // пустое допустимо
+    return /^[A-Za-z0-9_]*$/.test(val);
+  };
+  const userIdErrors = userIds.map((id) => !isValidUserId(id));
+
   // --- Рендер блока ID пользователей ---
   const renderUserIds = () =>
     Array.from({ length: Math.min(userCount, 200) }, (_, i) => (
@@ -245,6 +253,7 @@ export default function Settings() {
           placeholder={`ID ${i + 1}`}
           value={userIds[i] || ""}
           onChange={(e) => {
+            const value = e.target.value.replace(/[^A-Za-z0-9_]/g, "");
             const newUserIds = [...userIds];
             newUserIds[i] = e.target.value;
             setUserIds(newUserIds);
@@ -252,7 +261,7 @@ export default function Settings() {
           style={{
             fontSize: "14px",
             padding: "4px 6px",
-            border: "1px solid #d3d3d3",
+            border: userIdErrors[i] ? "1px solid red" : "1px solid #d3d3d3",
             borderRadius: "4px",
             width: "120px",
             outline: "none"
@@ -263,6 +272,42 @@ export default function Settings() {
       </div>
     ));
 
+  const savedConfigTooltip = t("tooltips.savedConfig.title");
+  const userDeviceTooltip = t("tooltips.userDevice.title");
+  const mobilityTooltip = t("tooltips.mobility.title");
+  const trafficTooltip = t("tooltips.traffic.title");
+  const schedulerTooltip = t("tooltips.scheduler.title");
+
+  const isNumber = (val) => val !== "" && !isNaN(val);
+
+  const getError = (min, max) => {
+    if (!isNumber(min) || !isNumber(max)) return true;
+    if (Number(min) > Number(max)) return true;
+    return false;
+  };
+
+  const isNonNegativeNumber = (val) => {
+    if (val === "") return true; // можно убрать, если хочешь сразу красить пустое
+    return !isNaN(val) && Number(val) >= 0;
+  };
+  const trafficErrors = {
+    packet_rate:
+      trafficParams.packet_rate === "" ||
+      isNaN(trafficParams.packet_rate) ||
+      Number(trafficParams.packet_rate) < 0,
+    averageActivePhaseDuration: !isNonNegativeNumber(trafficParams.averageActivePhaseDuration),
+    averageInactivePhaseDuration: !isNonNegativeNumber(trafficParams.averageInactivePhaseDuration),
+    trafficIntensityActivePhase: !isNonNegativeNumber(trafficParams.trafficIntensityActivePhase),
+  };
+
+  const pauseError =
+    movementParams.pause_time === "" ||
+    isNaN(movementParams.pause_time) ||
+    Number(movementParams.pause_time) < 0;
+
+  const xError = getError(movementParams.x_min, movementParams.x_max);
+  const yError = getError(movementParams.y_min, movementParams.y_max);
+
   return (
     <div style={{ marginLeft: "30px" }}>
       <h1 style={{ fontSize: "30px", fontFamily: "sans-serif", color: "#222933", marginBottom: "20px" }}>
@@ -271,23 +316,26 @@ export default function Settings() {
 
       {/* Контейнер с двумя столбиками */}
       <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "40px",
-          marginLeft: "20px",
-          marginRight: "50px",
-          marginTop: "-15px"
-        }}
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: "40px",
+        marginLeft: "20px",
+        marginRight: "50px",
+        marginTop: "-15px"
+      }}
       >
         {/* Левый столбик */}
         <div>
           {/* Список сохранённых конфигураций */}
           <div style={{ marginBottom: "30px" }}>
-            <h3 style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", marginBottom: "8px" }}>
+            <h3
+              title={savedConfigTooltip}
+              style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", marginBottom: "8px" }}>
               {t("settings.savedConfigs")}
+              <FiInfo size={16} style={{ cursor: "help", color: "#00A7C1", marginLeft: "3px" }} title={savedConfigTooltip} />
             </h3>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "15px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "15px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0", flex: 1 }}>
                 {/* Плашка выбора конфигурации */}
                 <div style={{ position: "relative" }}>
@@ -311,34 +359,34 @@ export default function Settings() {
                   >
                     <span>{selectedConfig || t("settings.selectConfig")}</span>
                     <span style={{
-                        width: 0,
-                        height: 0,
-                        borderLeft: "6px solid transparent",
-                        borderRight: "6px solid transparent",
-                        borderTop: "6px solid #00A7C1",
-                        transform: isConfigOpen ? "rotate(180deg)" : "rotate(0deg)",
-                        transition: "transform 0.2s ease",
-                        marginLeft: "8px"
-                      }}
+                      width: 0,
+                      height: 0,
+                      borderLeft: "6px solid transparent",
+                      borderRight: "6px solid transparent",
+                      borderTop: "6px solid #00A7C1",
+                      transform: isConfigOpen ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "transform 0.2s ease",
+                      marginLeft: "8px"
+                    }}
                     />
                   </div>
 
                   {/* Выпадающий список */}
                   {isConfigOpen && (
                     <div style={{
-                        position: "absolute",
-                        top: "100%",
-                        left: 0,
-                        right: 0,
-                        backgroundColor: "white",
-                        border: "2px solid #d3d3d3",
-                        borderTop: "none",
-                        borderRadius: "0 0 8px 8px",
-                        zIndex: 10,
-                        maxHeight: "200px",
-                        overflowY: "auto",
-                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)"
-                      }}
+                      position: "absolute",
+                      top: "100%",
+                      left: 0,
+                      right: 0,
+                      backgroundColor: "white",
+                      border: "2px solid #d3d3d3",
+                      borderTop: "none",
+                      borderRadius: "0 0 8px 8px",
+                      zIndex: 10,
+                      maxHeight: "200px",
+                      overflowY: "auto",
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)"
+                    }}
                     >
                       {configurations.map((config, index) => (
                         <div key={index}
@@ -398,29 +446,24 @@ export default function Settings() {
           {/* Пользовательское устройство */}
           <div style={{ marginBottom: "30px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-              <h3 style={{
-                  fontSize: "15px",
-                  fontFamily: "sans-serif",
-                  color: "#2A3D4C",
-                  margin: 0
-                }}
-              >
+              <h3 style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", margin: 0 }}>
                 {t("settings.userDevice")}
+                <FiInfo size={16} style={{ cursor: "help", color: "#00A7C1", marginLeft: "3px" }} title={userDeviceTooltip} />
               </h3>
 
-            {/* Контейнер с кнопками и количеством */}
+              {/* Контейнер с кнопками и количеством */}
               <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  width: "fit-content",
-                  border: "2px solid #E6E6E6",
-                  borderRadius: "8px",
-                  backgroundColor: "#fff",
-                  overflow: "hidden",
-                  marginTop: "8px"
-                }}
+                display: "flex",
+                alignItems: "center",
+                width: "fit-content",
+                border: "2px solid #E6E6E6",
+                borderRadius: "8px",
+                backgroundColor: "#fff",
+                overflow: "hidden",
+                marginTop: "8px"
+              }}
               >
-              {/* Кнопка уменьшения */}
+                {/* Кнопка уменьшения */}
                 <button
                   onClick={decreaseUsers}
                   style={{
@@ -436,17 +479,17 @@ export default function Settings() {
                   -
                 </button>
                 <span style={{
-                    fontSize: "15px",
-                    fontFamily: "sans-serif",
-                    color: "#2A3D4C",
-                    minWidth: "30px",
-                    textAlign: "center"
-                  }}
+                  fontSize: "15px",
+                  fontFamily: "sans-serif",
+                  color: "#2A3D4C",
+                  minWidth: "30px",
+                  textAlign: "center"
+                }}
                 >
                   {userCount}
                 </span>
 
-              {/* Кнопка увеличения */}
+                {/* Кнопка увеличения */}
                 <button
                   onClick={increaseUsers}
                   style={{
@@ -464,93 +507,47 @@ export default function Settings() {
               </div>
             </div>
 
-          {/* Подсказка под параметром */}
+            {/* Подсказка под параметром */}
             <span style={{
-                fontSize: "12px",
-                color: "#999",
-                fontFamily: "sans-serif",
-                marginTop: "4px",
-                display: "block",
-                marginLeft: "245px"
-              }}
+              fontSize: "12px",
+              color: "#999",
+              fontFamily: "sans-serif",
+              marginTop: "4px",
+              display: "block",
+              marginLeft: "265px"
+            }}
             >
               {t("settings.userId")}
             </span>
-
-          {/* Всплывающие блоки для уникальных идентификаторов (до 5 пользователей) */}
-            {Array.from({ length: Math.min(userCount, 200) }, (_, i) => (
-              <div key={i}
-                style={{
-                  marginTop: "10px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  width: "fit-content"
-                }}
-              >
-                <span style={{
-                    fontSize: "14px",
-                    color: "#222933",
-                    fontFamily: "sans-serif"
-                  }}
-                >
-                  {t("settings.userCount")} {i + 1}
-                </span>
-                <input type="text"
-                  placeholder={`ID ${i + 1}`}
-                  value={userIds[i] || ""}
-                  onChange={(e) => {
-                    const newUserIds = [...userIds];
-                    newUserIds[i] = e.target.value;
-                    setUserIds(newUserIds);
-                  }}
-                  style={{
-                    fontSize: "14px",
-                    padding: "4px 6px",
-                    border: "1px solid #d3d3d3",
-                    borderRadius: "4px",
-                    width: "120px",
-                    outline: "none"
-                  }}
-                  onFocus={(e) => (e.target.style.border = "1px solid #00A7C1")}
-                  onBlur={(e) => (e.target.style.border = "1px solid #d3d3d3")}
-                />
-              </div>
-            ))}
+            {/* Всплывающие блоки для уникальных идентификаторов (до 5 пользователей) */}
+            {renderUserIds()}
           </div>
         </div>
- 
+
         {/* Правый столбик */}
         <div style={{ marginTop: "15px" }}>
           {/* Модели передвижения */}
           <div style={{ marginBottom: "30px", display: "flex", gap: "20px", alignItems: "flex-start" }}
           >
-            <h3 style={{
-                width: "220px",
-                fontSize: "15px",
-                fontFamily: "sans-serif",
-                color: "#2A3D4C",
-                margin: 0,
-                flexShrink: 0
-              }}
-            >
+            <h3 style={{ width: "220px", fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", margin: 0, flexShrink: 0 }}>
               {t("settings.movementModels")}
+              <FiInfo size={16} title={mobilityTooltip} style={{ cursor: "help", color: "#00A7C1", marginLeft: "3px" }} />
             </h3>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {movementModels.map((model, index) => (
                 <label key={index} style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
                   <div style={{
-                      width: "18px",
-                      height: "18px",
-                      borderRadius: "50%",
-                      border: "2px solid #00A7C1",
-                      marginRight: "6px",
-                      position: "relative",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center"
-                    }}
+                    width: "18px",
+                    height: "18px",
+                    borderRadius: "50%",
+                    border: "2px solid #00A7C1",
+                    marginRight: "6px",
+                    position: "relative",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                  }}
                   >
                     <input type="radio"
                       name="movement"
@@ -561,11 +558,11 @@ export default function Settings() {
                     />
                     {selectedMovement === model.key && (
                       <div style={{
-                          width: "10px",
-                          height: "10px",
-                          borderRadius: "50%",
-                          backgroundColor: "#4EC8F0"
-                        }}
+                        width: "10px",
+                        height: "10px",
+                        borderRadius: "50%",
+                        backgroundColor: "#4EC8F0"
+                      }}
                       />
                     )}
                   </div>
@@ -575,210 +572,88 @@ export default function Settings() {
                 </label>
               ))}
 
-            {/* Блок дополнительных параметров */}
-            {selectedMovement && (
-              <div style={{ marginTop: "15px", marginLeft: "-240px" }}>
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "20px" }}>
-                  {/* Заголовок слева */}
-                  <h3 style={{
-                    fontSize: "15px",
-                    fontFamily: "sans-serif",
-                    color: "#222933",
-                    margin: 0,
-                    minWidth: "200px"
-                  }}>
-                    {t("settings.additionalParams")}
-                  </h3>
+              {/* Блок дополнительных параметров */}
+              {selectedMovement && (
+                <div style={{ marginTop: "15px", marginLeft: "-240px" }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "20px" }}>
+                    {/* Заголовок слева */}
+                    <h3 style={{
+                      fontSize: "15px",
+                      fontFamily: "sans-serif",
+                      color: "#222933",
+                      margin: 0,
+                      minWidth: "200px"
+                    }}>
+                      {t("settings.additionalParams")}
+                    </h3>
 
-                  {/* Блок X / Y / pause_time */}
-                  <div style={{ display: "flex", gap: "40px" }}>
+                    {/* Блок X / Y / pause_time */}
+                    <div style={{ display: "flex", gap: "40px" }}>
 
-                    {/* --- X column --- */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontFamily: "sans-serif" }}>
-                      {/* X min */}
-                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                        <span style={{
-                          width: "40px",
-                          fontWeight: 600,
-                          fontSize: "14px",
-                          color: "#222933",
-                          fontFamily: "sans-serif",
-                          marginTop: "-10px"
-                        }}>x:</span>
-                        <div style={{
-                          display: "flex",
-                          alignItems: "center",
-                          border: "1px solid #d3d3d3",
-                          borderRadius: "6px",
-                          padding: "4px 8px",
-                          width: "110px",
-                          justifyContent: "space-between",
-                          fontFamily: "sans-serif"
-                        }}>
-                          <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.min")}</span>
-                          <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
-                          <input
-                            type="number"
-                            value={movementParams.x_min || ""}
-                            onChange={(e) => handleMovementParamChange("x_min", e.target.value)}
-                            style={{
-                              width: "50px",
-                              border: "none",
-                              outline: "none",
-                              fontSize: "14px",
-                              textAlign: "right",
-                              fontFamily: "sans-serif",
-                              MozAppearance: "textfield",
-                              WebkitAppearance: "none",
-                              appearance: "none"
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* X max */}
-                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                        <span style={{ width: "40px", fontWeight: 600 }}></span>
-                        <div style={{
-                          display: "flex",
-                          alignItems: "center",
-                          border: "1px solid #d3d3d3",
-                          borderRadius: "6px",
-                          padding: "4px 8px",
-                          width: "110px",
-                          justifyContent: "space-between",
-                          fontFamily: "sans-serif"
-                        }}>
-                          <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.max")}</span>
-                          <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
-                          <input
-                            type="number"
-                            value={movementParams.x_max || ""}
-                            onChange={(e) => handleMovementParamChange("x_max", e.target.value)}
-                            style={{
-                              width: "50px",
-                              border: "none",
-                              outline: "none",
-                              fontSize: "14px",
-                              textAlign: "right",
-                              fontFamily: "sans-serif",
-                              MozAppearance: "textfield",
-                              WebkitAppearance: "none",
-                              appearance: "none"
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* --- Y column --- */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontFamily: "sans-serif" }}>
-                      {/* Y min */}
-                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                        <span style={{
-                          width: "40px",
-                          fontWeight: 600,
-                          fontSize: "14px",
-                          color: "#222933",
-                          fontFamily: "sans-serif",
-                          marginTop: "-10px"
-                        }}>y:</span>
-                        <div style={{
-                          display: "flex",
-                          alignItems: "center",
-                          border: "1px solid #d3d3d3",
-                          borderRadius: "6px",
-                          padding: "4px 8px",
-                          width: "110px",
-                          justifyContent: "space-between",
-                          fontFamily: "sans-serif"
-                        }}>
-                          <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.min")}</span>
-                          <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
-                          <input
-                            type="number"
-                            value={movementParams.y_min || ""}
-                            onChange={(e) => handleMovementParamChange("y_min", e.target.value)}
-                            style={{
-                              width: "50px",
-                              border: "none",
-                              outline: "none",
-                              fontSize: "14px",
-                              textAlign: "right",
-                              fontFamily: "sans-serif",
-                              MozAppearance: "textfield",
-                              WebkitAppearance: "none",
-                              appearance: "none"
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Y max */}
-                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                        <span style={{ width: "40px", fontWeight: 600 }}></span>
-                        <div style={{
-                          display: "flex",
-                          alignItems: "center",
-                          border: "1px solid #d3d3d3",
-                          borderRadius: "6px",
-                          padding: "4px 8px",
-                          width: "110px",
-                          justifyContent: "space-between",
-                          fontFamily: "sans-serif"
-                        }}>
-                          <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.max")}</span>
-                          <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
-                          <input
-                            type="number"
-                            value={movementParams.y_max || ""}
-                            onChange={(e) => handleMovementParamChange("y_max", e.target.value)}
-                            style={{
-                              width: "50px",
-                              border: "none",
-                              outline: "none",
-                              fontSize: "14px",
-                              textAlign: "right",
-                              fontFamily: "sans-serif",
-                              MozAppearance: "textfield",
-                              WebkitAppearance: "none",
-                              appearance: "none"
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* --- pause_time --- */}
-                    {(selectedMovement === "RandomWaypoint" || selectedMovement === "RandomDirection") && (
-                      <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontFamily: "sans-serif", marginTop: "15px" }}>
+                      {/* --- X column --- */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontFamily: "sans-serif" }}>
+                        {/* X min */}
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                           <span style={{
-                            width: "80px",
+                            width: "40px",
                             fontWeight: 600,
                             fontSize: "14px",
                             color: "#222933",
                             fontFamily: "sans-serif",
                             marginTop: "-10px"
-                          }}>
-                            {t("settings.pauseTime")}
-                          </span>
+                          }}>x:</span>
                           <div style={{
                             display: "flex",
                             alignItems: "center",
-                            border: "1px solid #d3d3d3",
+                            border: xError ? "1px solid red" : "1px solid #d3d3d3",
                             borderRadius: "6px",
                             padding: "4px 8px",
                             width: "110px",
-                            justifyContent: "flex-end",
+                            justifyContent: "space-between",
                             fontFamily: "sans-serif"
                           }}>
+                            <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.min")}</span>
+                            <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
                             <input
                               type="number"
-                              value={movementParams.pause_time || ""}
-                              onChange={(e) => handleMovementParamChange("pause_time", e.target.value)}
+                              value={movementParams.x_min || ""}
+                              onChange={(e) => handleMovementParamChange("x_min", e.target.value)}
                               style={{
-                                width: "80px",
+                                width: "50px",
+                                border: "none",
+                                outline: "none",
+                                fontSize: "14px",
+                                textAlign: "right",
+                                fontFamily: "sans-serif",
+                                MozAppearance: "textfield",
+                                WebkitAppearance: "none",
+                                appearance: "none"
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* X max */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <span style={{ width: "40px", fontWeight: 600 }}></span>
+                          <div style={{
+                            display: "flex",
+                            alignItems: "center",
+                            border: xError ? "1px solid red" : "1px solid #d3d3d3",
+                            borderRadius: "6px",
+                            padding: "4px 8px",
+                            width: "110px",
+                            justifyContent: "space-between",
+                            fontFamily: "sans-serif"
+                          }}>
+                            <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.max")}</span>
+                            <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
+                            <input
+                              type="number"
+                              value={movementParams.x_max || ""}
+                              onChange={(e) => handleMovementParamChange("x_max", e.target.value)}
+                              style={{
+                                width: "50px",
                                 border: "none",
                                 outline: "none",
                                 fontSize: "14px",
@@ -792,18 +667,141 @@ export default function Settings() {
                           </div>
                         </div>
                       </div>
-                    )}
+
+                      {/* --- Y column --- */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontFamily: "sans-serif" }}>
+                        {/* Y min */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <span style={{
+                            width: "40px",
+                            fontWeight: 600,
+                            fontSize: "14px",
+                            color: "#222933",
+                            fontFamily: "sans-serif",
+                            marginTop: "-10px"
+                          }}>y:</span>
+                          <div style={{
+                            display: "flex",
+                            alignItems: "center",
+                            border: yError ? "1px solid red" : "1px solid #d3d3d3",
+                            borderRadius: "6px",
+                            padding: "4px 8px",
+                            width: "110px",
+                            justifyContent: "space-between",
+                            fontFamily: "sans-serif"
+                          }}>
+                            <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.min")}</span>
+                            <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
+                            <input
+                              type="number"
+                              value={movementParams.y_min || ""}
+                              onChange={(e) => handleMovementParamChange("y_min", e.target.value)}
+                              style={{
+                                width: "50px",
+                                border: "none",
+                                outline: "none",
+                                fontSize: "14px",
+                                textAlign: "right",
+                                fontFamily: "sans-serif",
+                                MozAppearance: "textfield",
+                                WebkitAppearance: "none",
+                                appearance: "none"
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Y max */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <span style={{ width: "40px", fontWeight: 600 }}></span>
+                          <div style={{
+                            display: "flex",
+                            alignItems: "center",
+                            border: yError ? "1px solid red" : "1px solid #d3d3d3",
+                            borderRadius: "6px",
+                            padding: "4px 8px",
+                            width: "110px",
+                            justifyContent: "space-between",
+                            fontFamily: "sans-serif"
+                          }}>
+                            <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.max")}</span>
+                            <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
+                            <input
+                              type="number"
+                              value={movementParams.y_max || ""}
+                              onChange={(e) => handleMovementParamChange("y_max", e.target.value)}
+                              style={{
+                                width: "50px",
+                                border: "none",
+                                outline: "none",
+                                fontSize: "14px",
+                                textAlign: "right",
+                                fontFamily: "sans-serif",
+                                MozAppearance: "textfield",
+                                WebkitAppearance: "none",
+                                appearance: "none"
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* --- pause_time --- */}
+                      {(selectedMovement === "RandomWaypoint" || selectedMovement === "RandomDirection") && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontFamily: "sans-serif", marginTop: "15px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                            <span style={{
+                              width: "80px",
+                              fontWeight: 600,
+                              fontSize: "14px",
+                              color: "#222933",
+                              fontFamily: "sans-serif",
+                              marginTop: "-10px"
+                            }}>
+                              {t("settings.pauseTime")}
+                            </span>
+                            <div style={{
+                              display: "flex",
+                              alignItems: "center",
+                              border: pauseError ? "1px solid red" : "1px solid #d3d3d3",
+                              borderRadius: "6px",
+                              padding: "4px 8px",
+                              width: "110px",
+                              justifyContent: "flex-end",
+                              fontFamily: "sans-serif"
+                            }}>
+                              <input
+                                type="number"
+                                value={movementParams.pause_time || ""}
+                                onChange={(e) => handleMovementParamChange("pause_time", e.target.value)}
+                                style={{
+                                  width: "80px",
+                                  border: "none",
+                                  outline: "none",
+                                  fontSize: "14px",
+                                  textAlign: "right",
+                                  fontFamily: "sans-serif",
+                                  MozAppearance: "textfield",
+                                  WebkitAppearance: "none",
+                                  appearance: "none"
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
 
           {/* Модель трафика */}
           <div style={{ marginBottom: "30px", display: "flex", gap: "20px", alignItems: "flex-start" }}>
             <h3 style={{ width: "220px", fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", margin: 0, flexShrink: 0 }}>
               {t("settings.trafficModel")}
+              <FiInfo size={16} title={trafficTooltip} style={{ cursor: "help", color: "#00A7C1", marginLeft: "3px" }} />
             </h3>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -840,10 +838,10 @@ export default function Settings() {
                         <span style={{ width: "300px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>
                           {t("settings.averageTrafficIntensity")}
                         </span>
-                        <div style={{ display: "flex", alignItems: "center", border: "1px solid #d3d3d3", borderRadius: "6px", padding: "4px 8px", width: "110px", justifyContent: "flex-start", position: "relative" }}>
+                        <div style={{ display: "flex", alignItems: "center", border: trafficErrors.packet_rate ? "1px solid red" : "1px solid #d3d3d3", borderRadius: "6px", padding: "4px 8px", width: "110px", justifyContent: "flex-start", position: "relative" }}>
                           <input
                             type="number"
-                            value={trafficParams.packet_rate  || ""}
+                            value={trafficParams.packet_rate || ""}
                             onChange={(e) => handleTrafficParamChange("packet_rate", e.target.value)}
                             style={{ width: "80px", border: "none", outline: "none", fontSize: "14px", textAlign: "right", fontFamily: "sans-serif", marginLeft: "-25px" }}
                           />
@@ -868,7 +866,7 @@ export default function Settings() {
                           <div style={{
                             display: "flex",
                             alignItems: "center",
-                            border: "1px solid #d3d3d3",
+                            border: trafficErrors[key] ? "1px solid red" : "1px solid #d3d3d3",
                             borderRadius: "6px",
                             padding: "4px 8px",
                             width: "110px",
@@ -904,6 +902,7 @@ export default function Settings() {
           <div style={{ marginBottom: "30px", display: "flex", gap: "20px", alignItems: "flex-start" }}>
             <h3 style={{ width: "220px", fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", margin: 0, flexShrink: 0 }}>
               {t("settings.scheduler")}
+              <FiInfo size={16} title={schedulerTooltip} style={{ cursor: "help", color: "#00A7C1", marginLeft: "3px" }} />
             </h3>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -936,7 +935,7 @@ export default function Settings() {
             </div>
           </div>
         </div>
-    </div>
+      </div>
 
       {/* Кнопка "Запустить симуляцию" */}
       <div style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}>
@@ -944,9 +943,9 @@ export default function Settings() {
           style={{
             backgroundColor:
               userCount > 0 &&
-              selectedMovement &&
-              selectedTraffic &&
-              selectedScheduler
+                selectedMovement &&
+                selectedTraffic &&
+                selectedScheduler
                 ? "#00A7C1"
                 : "#80D3E0",
             color: "white",
@@ -958,17 +957,17 @@ export default function Settings() {
             fontFamily: "sans-serif",
             cursor:
               userCount > 0 &&
-              selectedMovement &&
-              selectedTraffic &&
-              selectedScheduler
+                selectedMovement &&
+                selectedTraffic &&
+                selectedScheduler
                 ? "pointer"
                 : "not-allowed",
             transition: "background-color 0.2s ease",
             opacity:
               userCount > 0 &&
-              selectedMovement &&
-              selectedTraffic &&
-              selectedScheduler
+                selectedMovement &&
+                selectedTraffic &&
+                selectedScheduler
                 ? 1
                 : 0.6
           }}

@@ -1,5 +1,7 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
 import { useTranslation } from "react-i18next";
+import { FiInfo } from "react-icons/fi";
+
 import { useSettings } from "../contexts/SettingsContext";
 import Graphs from "../components//Graphs";
 import trashIcon from "../icons/trash.png";
@@ -309,6 +311,104 @@ export default function Visualization({ showParamsPanel }) {
     transition: "transform 0.2s ease"
   };
 
+  const mobilityTooltip = t("tooltips.mobility.title");
+  const trafficTooltip = t("tooltips.traffic.title");
+  const DopUserDevice = t("tooltips.DopUserDevice.title");
+  const sectionTooltips = {
+    scheduler: t("tooltips.scheduler.title"),
+    channel: t("tooltips.channel.title"),
+    enodeb: t("tooltips.enodeb.title")
+  };
+
+  const isNumber = (val) =>
+    val !== "" && val !== null && val !== undefined && !isNaN(Number(val));
+
+  const toNumber = (val) => (isNumber(val) ? Number(val) : null);
+
+  const isValidRange = (min, max) => {
+    const minN = toNumber(min);
+    const maxN = toNumber(max);
+
+    if (minN === null || maxN === null) return false;
+    return minN <= maxN;
+  };
+
+  const isNonNegative = (val) => {
+    const n = toNumber(val);
+    return n !== null && n >= 0;
+  };
+
+  const movementErrors = {
+    x: !isValidRange(movementParams.x_min, movementParams.x_max),
+    y: !isValidRange(movementParams.y_min, movementParams.y_max),
+    pause_time:
+      selectedMovement &&
+      ["RandomWaypoint", "RandomDirection"].includes(selectedMovement)
+        ? !isNonNegative(movementParams.pause_time)
+        : false,
+    alpha:
+      selectedMovement === "GaussMarkov"
+        ? !isNonNegative(movementParams.alpha)
+        : false,
+    boundary_threshold:
+      selectedMovement === "GaussMarkov"
+        ? !isNonNegative(movementParams.boundary_threshold)
+        : false,
+  };
+  const currentTraffic = trafficParams[selectedTraffic] ?? {};
+
+  const trafficErrors = {
+    packet_rate:
+      selectedTraffic === "poisson"
+        ? !isNonNegative(currentTraffic.packet_rate ?? 0)
+        : false,
+
+    duration_on:
+      selectedTraffic === "onOff"
+        ? !isNonNegative(currentTraffic.duration_on ?? 0)
+        : false,
+
+    duration_off:
+      selectedTraffic === "onOff"
+        ? !isNonNegative(currentTraffic.duration_off ?? 0)
+        : false,
+  };
+
+  const getTrafficError = (key) => {
+    if (!selectedTraffic) return false;
+    return trafficErrors[key] ?? false;
+  };
+
+  const isNumberValid = (val) =>
+    val !== "" && !isNaN(val) && isFinite(val);
+
+  const ueErrors = {
+    x: !isNumberValid(ueParams.x),
+    y: !isNumberValid(ueParams.y),
+    buffer_size: 
+    !isNumberValid(ueParams.buffer_size) ||
+    ueParams.buffer_size < 0,
+  };
+
+  const channelErrors = Object.fromEntries(
+    Object.entries(channelParams[selectedChannelModel] || {}).map(([key, value]) => {
+      if (key === "o2i_model") return [key, false];
+
+      return [
+        key,
+        !isNumberValid(value) || Number(value) < 0
+      ];
+    })
+  );
+
+  const bsErrors = {
+    x: !isNumberValid(bsParams.x) || bsParams.x < 0,
+    y: !isNumberValid(bsParams.y) || bsParams.y < 0,
+    height: !isNumberValid(bsParams.height) || bsParams.height < 0,
+    frequency_GHz: !isNumberValid(bsParams.frequency_GHz) || bsParams.frequency_GHz < 0,
+    bandwidth: !isNumberValid(bsParams.bandwidth) || bsParams.bandwidth < 0,
+  };
+
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       {/* Панель параметров (слева от основного контента) */}
@@ -462,6 +562,7 @@ export default function Visualization({ showParamsPanel }) {
                 color: "#00A7C1"
               }}>▶</span>
               {t("settings.movement.movementParams", "UE Movement Parameters")}
+              <FiInfo size={16} title={mobilityTooltip} style={{cursor: "help", color: "#00A7C1", marginLeft: "3px"}}/>
             </div>
             {expandedSections.movement && (
               <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
@@ -508,7 +609,7 @@ export default function Visualization({ showParamsPanel }) {
                     <div style={{
                       display: "flex",
                       alignItems: "center",
-                      border: "1px solid #d3d3d3",
+                      border: movementErrors.x ? "1px solid red" : "1px solid #d3d3d3",
                       borderRadius: "6px",
                       padding: "4px 8px",
                       width: "110px",
@@ -536,7 +637,7 @@ export default function Visualization({ showParamsPanel }) {
                     <div style={{
                       display: "flex",
                       alignItems: "center",
-                      border: "1px solid #d3d3d3",
+                      border: movementErrors.x ? "1px solid red" : "1px solid #d3d3d3",
                       borderRadius: "6px",
                       padding: "4px 8px",
                       width: "110px",
@@ -566,7 +667,7 @@ export default function Visualization({ showParamsPanel }) {
                     <div style={{
                       display: "flex",
                       alignItems: "center",
-                      border: "1px solid #d3d3d3",
+                      border: movementErrors.y ? "1px solid red" : "1px solid #d3d3d3",
                       borderRadius: "6px",
                       padding: "4px 8px",
                       width: "110px",
@@ -594,7 +695,7 @@ export default function Visualization({ showParamsPanel }) {
                     <div style={{
                       display: "flex",
                       alignItems: "center",
-                      border: "1px solid #d3d3d3",
+                      border: movementErrors.y ? "1px solid red" : "1px solid #d3d3d3",
                       borderRadius: "6px",
                       padding: "4px 8px",
                       width: "110px",
@@ -624,7 +725,7 @@ export default function Visualization({ showParamsPanel }) {
                     <div style={{
                       display: "flex",
                       alignItems: "center",
-                      border: "1px solid #d3d3d3",
+                      border: movementErrors.pause_time ? "1px solid red" : "1px solid #d3d3d3",
                       borderRadius: "6px",
                       padding: "4px 8px",
                       width: "110px",
@@ -648,7 +749,7 @@ export default function Visualization({ showParamsPanel }) {
                   </div>
                 )}
                 {/* GaussMarkovModel параметры */}
-                {selectedMovement === "gaussMarkov" && (
+                {selectedMovement === "GaussMarkov" && (
                   <>
                     {/* alpha */}
                     <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -656,7 +757,7 @@ export default function Visualization({ showParamsPanel }) {
                       <div style={{
                         display: "flex",
                         alignItems: "center",
-                        border: "1px solid #d3d3d3",
+                        border: movementErrors.alpha ? "1px solid red" : "1px solid #d3d3d3",
                         borderRadius: "6px",
                         padding: "4px 8px",
                         width: "110px",
@@ -684,7 +785,7 @@ export default function Visualization({ showParamsPanel }) {
                       <div style={{
                         display: "flex",
                         alignItems: "center",
-                        border: "1px solid #d3d3d3",
+                        border: movementErrors.boundary_threshold ? "1px solid red" : "1px solid #d3d3d3",
                         borderRadius: "6px",
                         padding: "4px 8px",
                         width: "110px",
@@ -739,6 +840,7 @@ export default function Visualization({ showParamsPanel }) {
                 ▶
               </span>
               {t("visualization.trafficParams")}
+              <FiInfo size={16} title={trafficTooltip} style={{cursor: "help", color: "#00A7C1", marginLeft: "3px"}}/>
             </div>
 
             {expandedSections.traffic && (
@@ -795,7 +897,7 @@ export default function Visualization({ showParamsPanel }) {
                               style={{
                                 display: "flex",
                                 alignItems: "center",
-                                border: "1px solid #d3d3d3",
+                                border: getTrafficError("packet_rate") ? "1px solid red" : "1px solid #d3d3d3",
                                 borderRadius: "6px",
                                 padding: "4px 8px",
                                 width: "110px",
@@ -832,7 +934,7 @@ export default function Visualization({ showParamsPanel }) {
                                 style={{
                                   display: "flex",
                                   alignItems: "center",
-                                  border: "1px solid #d3d3d3",
+                                  border: getTrafficError(key) ? "1px solid red" : "1px solid #d3d3d3",
                                   borderRadius: "6px",
                                   padding: "4px 8px",
                                   width: "110px",
@@ -878,6 +980,7 @@ export default function Visualization({ showParamsPanel }) {
                 ▶
               </span>
               {t("visualization.ueSection")}
+              <FiInfo size={16} title={DopUserDevice} style={{cursor: "help", color: "#00A7C1", marginLeft: "3px"}}/>
             </div>
             {expandedSections.ue && (
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -991,7 +1094,7 @@ export default function Visualization({ showParamsPanel }) {
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          border: "1px solid #d3d3d3",
+                          border: ueErrors.x ? "1px solid red" : "1px solid #d3d3d3",
                           borderRadius: "6px",
                           padding: "4px 8px",
                           width: "110px",
@@ -1022,7 +1125,7 @@ export default function Visualization({ showParamsPanel }) {
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          border: "1px solid #d3d3d3",
+                          border: ueErrors.y ? "1px solid red" : "1px solid #d3d3d3",
                           borderRadius: "6px",
                           padding: "4px 8px",
                           width: "110px",
@@ -1057,7 +1160,7 @@ export default function Visualization({ showParamsPanel }) {
                       <div style={{
                         display: "flex",
                         alignItems: "center",
-                        border: "1px solid #d3d3d3",
+                        border: ueErrors.buffer_size ? "1px solid red" : "1px solid #d3d3d3",
                         borderRadius: "6px",
                         padding: "4px 4px 4px 8px",
                         width: "113px",
@@ -1185,6 +1288,7 @@ export default function Visualization({ showParamsPanel }) {
                   ▶
                 </span>
                 {section === "scheduler" ? t("visualization.schedulerSection") : section === "channel" ? t("visualization.channelParams") : t("visualization.enodebSection")}
+                <FiInfo size={16} title={sectionTooltips[section]} style={{cursor: "help", color: "#00A7C1", marginLeft: "3px"}}/>
               </div>
               {expandedSections[section] && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "4px" }}>
@@ -1291,7 +1395,7 @@ export default function Visualization({ showParamsPanel }) {
                                     style={{
                                       display: "flex",
                                       alignItems: "center",
-                                      border: "1px solid #d3d3d3",
+                                      border: channelErrors[key] ? "1px solid red" : "1px solid #d3d3d3",
                                       borderRadius: "6px",
                                       padding: "4px 8px",
                                       width: "110px",
@@ -1415,7 +1519,7 @@ export default function Visualization({ showParamsPanel }) {
                                     style={{
                                       display: "flex",
                                       alignItems: "center",
-                                      border: "1px solid #d3d3d3",
+                                      border: channelErrors[key] ? "1px solid red" : "1px solid #d3d3d3",
                                       borderRadius: "6px",
                                       padding: "4px 8px",
                                       width: "110px",
@@ -1479,7 +1583,7 @@ export default function Visualization({ showParamsPanel }) {
                           style={{
                             display: "flex",
                             alignItems: "center",
-                            border: "1px solid #d3d3d3",
+                            border: bsErrors.x ? "1px solid red" : "1px solid #d3d3d3",
                             borderRadius: "6px",
                             padding: "4px 8px",
                             width: "110px",
@@ -1511,7 +1615,7 @@ export default function Visualization({ showParamsPanel }) {
                           style={{
                             display: "flex",
                             alignItems: "center",
-                            border: "1px solid #d3d3d3",
+                            border: bsErrors.y ? "1px solid red" : "1px solid #d3d3d3",
                             borderRadius: "6px",
                             padding: "4px 8px",
                             width: "110px",
@@ -1554,7 +1658,7 @@ export default function Visualization({ showParamsPanel }) {
                             style={{
                               display: "flex",
                               alignItems: "center",
-                              border: "1px solid #d3d3d3",
+                              border: bsErrors[param.key] ? "1px solid red" : "1px solid #d3d3d3",
                               borderRadius: "6px",
                               padding: "4px 8px",
                               width: "110px",

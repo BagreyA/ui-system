@@ -528,5 +528,39 @@
   
   "mainContent": {
     "title": "Graphs"
+  },
+
+  "tooltips": {
+  "savedConfig": {
+    "title": "The list of saved simulation configurations contains parameter sets loaded from files, as well as standard scenarios created to demonstrate the capabilities of the interface."
+  },
+
+  "userDevice": {
+    "title": "User Equipment (UE) parameters. Used to define the number of devices and their identifiers participating in the network simulation."
+  },
+
+  "DopUserDevice": {
+    "title": "User Equipment (UE_MODULE).\n\nAllows creating and configuring each UE individually. In the future, the model will be extended to support UE collections.\n\nUE parameters:\nUE_ID — unique user identifier.\nx — initial X coordinate (m), default 0.0.\ny — initial Y coordinate (m), default 0.0.\nbuffer_size — buffer size (bytes), default 1048576.\nue_class — user class (indoor, pedestrian, cyclist, car), default: pedestrian."
+  },
+
+  "mobility": {
+    "title": "User Equipment mobility models (MOBILITY_MODEL).\n\nRandom Walk Model — random movement within a defined area.\nRandom Waypoint Model — movement between random points with pauses.\nRandom Direction Model — movement in a random direction with pauses.\nGauss Markov Model — movement with memory of the previous state.\n\nParameters used:\nx_min, x_max — X-axis boundaries (m)\ny_min, y_max — Y-axis boundaries (m)\npause_time — pause between movements (ms, only for waypoint/direction models)"
+  },
+
+  "traffic": {
+    "title": "Traffic models (TRAFFIC_MODEL).\n\nPoissonModel — packet flow with a fixed average arrival rate.\nOnOffModel — alternating active and inactive transmission phases.\nMMPPModel — Markov Modulated Poisson Process (under development).\n\nParameters:\npacket_rate — traffic intensity (packets/sec)\nduration_on — duration of active phase (sec)\nduration_off — duration of inactive phase (sec)"
+  },
+
+  "scheduler": {
+    "title": "Resource scheduler (SCHEDULER).\n\nRoundRobin — evenly distributes resources among users.\nBestCQI — selects the user with the best channel quality.\nProportionalFair — balances throughput and fairness."
+  },
+
+  "enodeb": {
+    "title": "Base Station (BS_MODULE).\n\nAllows creating and configuring a base station. The user can define its location and radio parameters.\n\nParameters:\nx — X coordinate of the station (m), default 0.0.\ny — Y coordinate of the station (m), default 0.0.\nheight — antenna installation height (m), default 35.0.\nfrequency_GHz — operating frequency (GHz), default 1.8.\nbandwidth — channel bandwidth (MHz), default 10."
+    },
+
+  "channel": {
+    "title": "Channel Models (CHANNEL_MODEL)\n\nThe channel model describes radio signal propagation conditions between the base station and the UE. Different models correspond to different types of urban environments.\n\nRMaModel (Rural Macro)\nUsed for rural areas and open spaces with low building density.\nCharacterized by long distances and minimal obstacles.\nParameters:\nW — average street width (m), default 20.0\nh — average building height (m), default 5.0\ncond_update_period — channel update period (ms), default 0.0\n\nUMaModel (Urban Macro)\nUsed for dense urban environments with tall buildings and long-range links between UE and BS.\nParameters:\ncond_update_period — channel update period (ms), default 0.0\no2i_model — indoor penetration model ('low' | 'high'), default 'low'\n\nUMiModel (Urban Micro)\nUsed for urban environments with short distances between devices and the base station.\nParameters:\ncond_update_period — channel update period (ms), default 0.0\no2i_model — indoor penetration model ('low' | 'high'), default 'low'"
+  }
   }
 }

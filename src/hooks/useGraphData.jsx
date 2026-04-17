@@ -5,7 +5,7 @@ export default function useGraphData() {
   const [graphData, setGraphData] = useState({});
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8000/ws/csv_stream");
+    const ws = new WebSocket("ws://localhost:8000/api/v1/ws/csv_stream");
 
     let csvText = "";
 
