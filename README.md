@@ -32,17 +32,59 @@
 - Навигация через боковую панель с иконками
 - Подготовка данных для дальнейшего моделирования
 
+## Запуск проекта
+
+### Установка зависимостей
+
+```bash
+npm install
+```
+
+### Запуск frontend
+
+```bash
+npm run dev
+```
+
+### Сборка проекта
+
+```bash
+npm run build
+```
+
 ## Структура проекта
 ```
 project-root/
 │
 ├── public/
-│ └── icons/ # иконки для навигации
+│ └── data/
 │
 ├── src/
-│ ├── components/
-│ │ ├── Navbar.jsx # Боковое меню
-│ │ └── ThemeToggle.jsx # Переключатель темы и языка
+│ ├── api/ # работа с backend API и запросами
+│ │ ├── axios.js # базовая настройка Axios
+│ │ ├── index_home.js # API главной страницы
+│ │ ├── simulation.js # API симуляции и моделирования
+│ │ └── tests.js # API тестирования
+│ │
+│ ├── components/ # React-компоненты
+│ │ ├── graphs/ # компоненты визуализации данных
+│ │ │
+│ │ ├── Modal/ # загрузить/сохранить конфигурацию 
+│ │ │  └── Modal.jsx
+│ │ │
+│ │ ├── Graphs.jsx # основной компонент графиков
+│ │ ├── Navbar.jsx # боковое меню
+│ │ └── ThemeToggle.jsx # переключатель темы и языка
+│ │
+│ ├── contexts/ # React Context для глобального состояния
+│ │ └── SettingsContext.jsx # контекст пользовательских настроек
+│ │
+│ ├── hooks/ # пользовательские React hooks
+│ │ └── useSimulationData.js  # работа с данными симуляции
+│ │
+│ ├── locales/ # локализация интерфейса
+│ │ ├── en/
+│ │ └── ru/
 │ │
 │ ├── pages/
 │ │ ├── About.jsx # страница о нас
@@ -52,9 +94,10 @@ project-root/
 │ │ ├── Tests.jsx # страница тесты
 │ │ └── Visualization.jsx # страница графиков
 │ │
-│ ├── App.jsx
-│ ├── mailn.jsx
-│ └── index.js
+│ ├── App.jsx # корневой компонент приложения
+│ ├── i18n.js # конфигурация локализации
+│ ├── main.jsx # точка входа React-приложения
+│ └── index.js # глобальные стили
 │
 ├── postcss.config.cjs
 ├── tailwind.config.js
