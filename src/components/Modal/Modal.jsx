@@ -22,7 +22,7 @@ export default function Modal({
         left: 0,
         width: "100vw",
         height: "100vh",
-        backgroundColor: "rgba(0,0,0,0.5)",
+        backgroundColor: "var(--overlay, rgba(0,0,0,0.5))",
         display: "flex",
         fontFamily: "sans-serif",
         justifyContent: "center",
@@ -33,7 +33,7 @@ export default function Modal({
     >
       <div
         style={{
-          backgroundColor: "white",
+          backgroundColor: "var(--card)",
           padding: "20px 30px 20px 20px",
           borderRadius: "10px",
           minWidth: "500px",
@@ -54,8 +54,10 @@ export default function Modal({
           style={{
             padding: "8px",
             borderRadius: "5px",
-            border: "1px solid #ccc",
+            border: "1px solid var(--border)",
             width: "100%",
+            background: "var(--card)",
+            color: "var(--text)",
           }}
         />
 
@@ -66,10 +68,12 @@ export default function Modal({
           style={{
             padding: "8px",
             borderRadius: "5px",
-            border: "1px solid #ccc",
+            border: "1px solid var(--border)",
             width: "100%",
             height: "100px",
             resize: "none",
+            background: "var(--card)",
+            color: "var(--text)",
           }}
         />
 
@@ -77,7 +81,7 @@ export default function Modal({
           onClick={onConfirm}
           style={{
             padding: "10px",
-            backgroundColor: "#00A7C1",
+            backgroundColor: "var(--primary)",
             color: "white",
             border: "none",
             borderRadius: "5px",
@@ -111,7 +115,7 @@ export function LoadModal({
         left: 0,
         width: "100vw",
         height: "100vh",
-        backgroundColor: "rgba(0,0,0,0.5)",
+        backgroundColor: "var(--overlay, rgba(0,0,0,0.5))",
         display: "flex",
         fontFamily: "sans-serif",
         justifyContent: "center",
@@ -122,7 +126,7 @@ export function LoadModal({
     >
       <div
         style={{
-          backgroundColor: "white",
+          backgroundColor: "var(--bg)",
           padding: "20px 30px 20px 20px",
           borderRadius: "10px",
           minWidth: "400px",
@@ -142,7 +146,10 @@ export function LoadModal({
           style={{
             padding: "8px",
             borderRadius: "5px",
-            border: "1px solid #ccc",
+            border: "1px solid var(--border)",
+            background: "var(--card)",
+            color: "var(--text)",
+
           }}
         />
 
@@ -154,8 +161,10 @@ export function LoadModal({
           style={{
             padding: "6px",
             borderRadius: "5px",
-            border: "1px solid #ccc",
+            border: "1px solid var(--border)",
             width: "100%",
+            background: "var(--card)",
+            color: "var(--text)",
           }}
         />
 
@@ -163,7 +172,7 @@ export function LoadModal({
           onClick={onConfirm}
           style={{
             padding: "10px",
-            backgroundColor: "#00A7C1",
+            backgroundColor: "var(--primary)",
             color: "white",
             border: "none",
             borderRadius: "5px",

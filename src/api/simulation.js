@@ -18,7 +18,7 @@ const defaultConfigs = {
     selectedTraffic: "poisson",
     trafficParams: { packet_rate: 200 },
     selectedScheduler: "Round Robin",
-    userIds: ["UE1","UE2","UE3","UE4","UE5"]
+    userIds: ["UE1", "UE2", "UE3", "UE4", "UE5"]
   },
   "pedestrian mobility stress": {
     userCount: 10,
@@ -27,7 +27,7 @@ const defaultConfigs = {
     selectedTraffic: "onOff",
     trafficParams: { averageActivePhaseDuration: 5, averageInactivePhaseDuration: 3, trafficIntensityActivePhase: 50 },
     selectedScheduler: "Round Robin",
-    userIds: Array.from({ length: 10 }, (_, i) => `UE${i+1}`)
+    userIds: Array.from({ length: 10 }, (_, i) => `UE${i + 1}`)
   },
   "vehicular mobility pf": {
     userCount: 5,
@@ -36,7 +36,7 @@ const defaultConfigs = {
     selectedTraffic: "poisson",
     trafficParams: { packet_rate: 300 },
     selectedScheduler: "Proportional Fair",
-    userIds: Array.from({ length: 5 }, (_, i) => `UE${i+1}`)
+    userIds: Array.from({ length: 5 }, (_, i) => `UE${i + 1}`)
   },
   "dense network bestcqi": {
     userCount: 20,
@@ -45,7 +45,7 @@ const defaultConfigs = {
     selectedTraffic: "poisson",
     trafficParams: { packet_rate: 150 },
     selectedScheduler: "Best CQI",
-    userIds: Array.from({ length: 20 }, (_, i) => `UE${i+1}`)
+    userIds: Array.from({ length: 20 }, (_, i) => `UE${i + 1}`)
   }
 };
 

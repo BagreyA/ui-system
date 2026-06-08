@@ -245,7 +245,7 @@ export default function Settings() {
   const renderUserIds = () =>
     Array.from({ length: Math.min(userCount, 200) }, (_, i) => (
       <div key={i} style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "10px", width: "fit-content" }}>
-        <span style={{ fontSize: "14px", color: "#222933", fontFamily: "sans-serif" }}>
+        <span style={{ fontSize: "14px", color: "var(--text)", fontFamily: "sans-serif" }}>
           {t("settings.userCount")} {i + 1}
         </span>
         <input
@@ -261,13 +261,15 @@ export default function Settings() {
           style={{
             fontSize: "14px",
             padding: "4px 6px",
-            border: userIdErrors[i] ? "1px solid red" : "1px solid #d3d3d3",
+            border: userIdErrors[i] ? "1px solid var(--error)" : "1px solid var(--border)",
             borderRadius: "4px",
             width: "120px",
-            outline: "none"
+            outline: "none",
+            background: "var(--card)",
+            color: "var(--text)",
           }}
-          onFocus={(e) => (e.target.style.border = "1px solid #00A7C1")}
-          onBlur={(e) => (e.target.style.border = "1px solid #d3d3d3")}
+          onFocus={(e) => (e.target.style.border = "1px solid var(--primary)")}
+          onBlur={(e) => (e.target.style.border = "1px solid var(--border)")}
         />
       </div>
     ));
@@ -310,7 +312,7 @@ export default function Settings() {
 
   return (
     <div style={{ marginLeft: "30px" }}>
-      <h1 style={{ fontSize: "30px", fontFamily: "sans-serif", color: "#222933", marginBottom: "20px" }}>
+      <h1 style={{ fontSize: "30px", fontFamily: "sans-serif", color: "var(--text)", marginBottom: "20px" }}>
         {t("settings.title")}
       </h1>
 
@@ -330,9 +332,9 @@ export default function Settings() {
           <div style={{ marginBottom: "30px" }}>
             <h3
               title={savedConfigTooltip}
-              style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", marginBottom: "8px" }}>
+              style={{ fontSize: "15px", fontFamily: "sans-serif", color: "var(--text)", marginBottom: "8px" }}>
               {t("settings.savedConfigs")}
-              <FiInfo size={16} style={{ cursor: "help", color: "#00A7C1", marginLeft: "3px" }} title={savedConfigTooltip} />
+              <FiInfo size={16} style={{ cursor: "help", color: "var(--primary)", marginLeft: "3px" }} title={savedConfigTooltip} />
             </h3>
 
             <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "15px" }}>
@@ -342,19 +344,19 @@ export default function Settings() {
                   <div
                     onClick={() => setIsConfigOpen(!isConfigOpen)}
                     style={{
-                      border: "2px solid #E6E6E6",
+                      border: "2px solid var(--border)",
                       borderRadius: "8px 0 0 8px",
                       padding: "6px 12px",
-                      backgroundColor: "white",
+                      backgroundColor: "var(--bg)",
                       cursor: "pointer",
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
                       fontSize: "12px",
                       fontFamily: "sans-serif",
-                      color: selectedConfig ? "#2A3D4C" : "#A7A7AA",
+                      color: selectedConfig ? "var(--text)" : "var(--text-secondary)",
                       width: "240px",
-                      height: "21px"
+                      height: "36px"
                     }}
                   >
                     <span>{selectedConfig || t("settings.selectConfig")}</span>
@@ -363,7 +365,7 @@ export default function Settings() {
                       height: 0,
                       borderLeft: "6px solid transparent",
                       borderRight: "6px solid transparent",
-                      borderTop: "6px solid #00A7C1",
+                      borderTop: "6px solid var(--primary)",
                       transform: isConfigOpen ? "rotate(180deg)" : "rotate(0deg)",
                       transition: "transform 0.2s ease",
                       marginLeft: "8px"
@@ -378,8 +380,8 @@ export default function Settings() {
                       top: "100%",
                       left: 0,
                       right: 0,
-                      backgroundColor: "white",
-                      border: "2px solid #d3d3d3",
+                      backgroundColor: "var(--bg)",
+                      border: "2px solid var(--border)",
                       borderTop: "none",
                       borderRadius: "0 0 8px 8px",
                       zIndex: 10,
@@ -396,14 +398,14 @@ export default function Settings() {
                             cursor: "pointer",
                             fontSize: "12px",
                             fontFamily: "sans-serif",
-                            color: "#2A3D4C",
-                            borderBottom: "1px solid #f0f0f0",
-                            backgroundColor: selectedConfig === config ? "#e6f7fa" : "white",
+                            color: "var(--text)",
+                            borderBottom: "1px solid var(--border)",
+                            backgroundColor: selectedConfig === config ? "var(--card)" : "var(--bg)",
                             transition: "background-color 0.2s ease"
                           }}
-                          onMouseEnter={(e) => (e.target.style.backgroundColor = "#f8f9fa")}
+                          onMouseEnter={(e) => (e.target.style.backgroundColor = "var(--card)")}
                           onMouseLeave={(e) =>
-                            (e.target.style.backgroundColor = selectedConfig === config ? "#e6f7fa" : "white")
+                            (e.target.style.backgroundColor = selectedConfig === config ? "var(--card)" : "var(--bg)")
                           }
                         >
                           {config}
@@ -417,23 +419,23 @@ export default function Settings() {
                 <button
                   onClick={handleLoadConfig}
                   style={{
-                    backgroundColor: "#00A7C1",
+                    backgroundColor: "var(--primary)",
                     color: "white",
                     fontSize: "15px",
                     width: "100px",
                     height: "36px",
                     borderRadius: "0 8px 8px 0",
-                    border: "2px solid #00A7C1",
+                    border: "2px solid var(--primary)",
                     fontFamily: "sans-serif",
                     cursor: selectedConfig ? "pointer" : "not-allowed",
                     transition: "background-color 0.2s ease",
                     flexShrink: 0
                   }}
                   onMouseEnter={(e) => {
-                    if (selectedConfig) e.target.style.backgroundColor = "#00A7C1";
+                    if (selectedConfig) e.target.style.backgroundColor = "var(--primary-hover)";
                   }}
                   onMouseLeave={(e) => {
-                    if (selectedConfig) e.target.style.backgroundColor = "#00A7C1";
+                    if (selectedConfig) e.target.style.backgroundColor = "var(--primary)";
                   }}
                   disabled={!selectedConfig}
                 >
@@ -446,9 +448,9 @@ export default function Settings() {
           {/* Пользовательское устройство */}
           <div style={{ marginBottom: "30px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-              <h3 style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", margin: 0 }}>
+              <h3 style={{ fontSize: "15px", fontFamily: "sans-serif", color: "var(--text)", margin: 0 }}>
                 {t("settings.userDevice")}
-                <FiInfo size={16} style={{ cursor: "help", color: "#00A7C1", marginLeft: "3px" }} title={userDeviceTooltip} />
+                <FiInfo size={16} style={{ cursor: "help", color: "var(--primary)", marginLeft: "3px" }} title={userDeviceTooltip} />
               </h3>
 
               {/* Контейнер с кнопками и количеством */}
@@ -456,9 +458,9 @@ export default function Settings() {
                 display: "flex",
                 alignItems: "center",
                 width: "fit-content",
-                border: "2px solid #E6E6E6",
+                border: "2px solid var(--border)",
                 borderRadius: "8px",
-                backgroundColor: "#fff",
+                backgroundColor: "#var(--bg)",
                 overflow: "hidden",
                 marginTop: "8px"
               }}
@@ -470,10 +472,10 @@ export default function Settings() {
                     backgroundColor: "transparent",
                     border: "none",
                     fontSize: "18px",
-                    color: "#7C7C80",
+                    color: "var(--text-secondary)",
                     cursor: "pointer",
                     padding: "0 12px",
-                    borderRight: "1px solid #d3d3d3"
+                    borderRight: "1px solid var(--border)"
                   }}
                 >
                   -
@@ -481,7 +483,7 @@ export default function Settings() {
                 <span style={{
                   fontSize: "15px",
                   fontFamily: "sans-serif",
-                  color: "#2A3D4C",
+                  color: "var(--text)",
                   minWidth: "30px",
                   textAlign: "center"
                 }}
@@ -496,10 +498,10 @@ export default function Settings() {
                     backgroundColor: "transparent",
                     border: "none",
                     fontSize: "18px",
-                    color: "#7C7C80",
+                    color: "var(--text-secondary)",
                     cursor: "pointer",
                     padding: "0 12px",
-                    borderLeft: "1px solid #d3d3d3"
+                    borderLeft: "1px solid var(--border)"
                   }}
                 >
                   +
@@ -510,7 +512,7 @@ export default function Settings() {
             {/* Подсказка под параметром */}
             <span style={{
               fontSize: "12px",
-              color: "#999",
+              color: "var(--text-secondary)",
               fontFamily: "sans-serif",
               marginTop: "4px",
               display: "block",
@@ -529,9 +531,9 @@ export default function Settings() {
           {/* Модели передвижения */}
           <div style={{ marginBottom: "30px", display: "flex", gap: "20px", alignItems: "flex-start" }}
           >
-            <h3 style={{ width: "220px", fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", margin: 0, flexShrink: 0 }}>
+            <h3 style={{ width: "220px", fontSize: "15px", fontFamily: "sans-serif", color: "var(--text)", margin: 0, flexShrink: 0 }}>
               {t("settings.movementModels")}
-              <FiInfo size={16} title={mobilityTooltip} style={{ cursor: "help", color: "#00A7C1", marginLeft: "3px" }} />
+              <FiInfo size={16} title={mobilityTooltip} style={{ cursor: "help", color: "var(--primary)", marginLeft: "3px" }} />
             </h3>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -541,7 +543,7 @@ export default function Settings() {
                     width: "18px",
                     height: "18px",
                     borderRadius: "50%",
-                    border: "2px solid #00A7C1",
+                    border: "2px solid var(--primary)",
                     marginRight: "6px",
                     position: "relative",
                     display: "flex",
@@ -566,7 +568,7 @@ export default function Settings() {
                       />
                     )}
                   </div>
-                  <span style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C" }}>
+                  <span style={{ fontSize: "15px", fontFamily: "sans-serif", color: "var(--text)" }}>
                     {model.label}
                   </span>
                 </label>
@@ -580,7 +582,7 @@ export default function Settings() {
                     <h3 style={{
                       fontSize: "15px",
                       fontFamily: "sans-serif",
-                      color: "#222933",
+                      color: "var(--text)",
                       margin: 0,
                       minWidth: "200px"
                     }}>
@@ -598,22 +600,22 @@ export default function Settings() {
                             width: "40px",
                             fontWeight: 600,
                             fontSize: "14px",
-                            color: "#222933",
+                            color: "var(--text)",
                             fontFamily: "sans-serif",
                             marginTop: "-10px"
                           }}>x:</span>
                           <div style={{
                             display: "flex",
                             alignItems: "center",
-                            border: xError ? "1px solid red" : "1px solid #d3d3d3",
+                            border: xError ? "1px solid var(--error)" : "1px solid var(--border)",
                             borderRadius: "6px",
                             padding: "4px 8px",
                             width: "110px",
                             justifyContent: "space-between",
                             fontFamily: "sans-serif"
                           }}>
-                            <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.min")}</span>
-                            <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
+                            <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{t("settings.min")}</span>
+                            <div style={{ width: "1px", height: "18px", background: "var(--border)" }} />
                             <input
                               type="number"
                               value={movementParams.x_min || ""}
@@ -626,6 +628,8 @@ export default function Settings() {
                                 textAlign: "right",
                                 fontFamily: "sans-serif",
                                 MozAppearance: "textfield",
+                                background: "transparent",
+                                color: "var(--text)",
                                 WebkitAppearance: "none",
                                 appearance: "none"
                               }}
@@ -639,15 +643,15 @@ export default function Settings() {
                           <div style={{
                             display: "flex",
                             alignItems: "center",
-                            border: xError ? "1px solid red" : "1px solid #d3d3d3",
+                            border: xError ? "1px solid var(--error)" : "1px solid var(--border)",
                             borderRadius: "6px",
                             padding: "4px 8px",
                             width: "110px",
                             justifyContent: "space-between",
                             fontFamily: "sans-serif"
                           }}>
-                            <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.max")}</span>
-                            <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
+                            <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{t("settings.max")}</span>
+                            <div style={{ width: "1px", height: "18px", background: "var(--border)" }} />
                             <input
                               type="number"
                               value={movementParams.x_max || ""}
@@ -660,6 +664,8 @@ export default function Settings() {
                                 textAlign: "right",
                                 fontFamily: "sans-serif",
                                 MozAppearance: "textfield",
+                                background: "transparent",
+                                color: "var(--text)",
                                 WebkitAppearance: "none",
                                 appearance: "none"
                               }}
@@ -676,22 +682,22 @@ export default function Settings() {
                             width: "40px",
                             fontWeight: 600,
                             fontSize: "14px",
-                            color: "#222933",
+                            color: "var(--text)",
                             fontFamily: "sans-serif",
                             marginTop: "-10px"
                           }}>y:</span>
                           <div style={{
                             display: "flex",
                             alignItems: "center",
-                            border: yError ? "1px solid red" : "1px solid #d3d3d3",
+                            border: yError ? "1px solid var(--error)" : "1px solid var(--border)",
                             borderRadius: "6px",
                             padding: "4px 8px",
                             width: "110px",
                             justifyContent: "space-between",
                             fontFamily: "sans-serif"
                           }}>
-                            <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.min")}</span>
-                            <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
+                            <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{t("settings.min")}</span>
+                            <div style={{ width: "1px", height: "18px", background: "var(--border)" }} />
                             <input
                               type="number"
                               value={movementParams.y_min || ""}
@@ -704,6 +710,8 @@ export default function Settings() {
                                 textAlign: "right",
                                 fontFamily: "sans-serif",
                                 MozAppearance: "textfield",
+                                background: "transparent",
+                                color: "var(--text)",
                                 WebkitAppearance: "none",
                                 appearance: "none"
                               }}
@@ -717,15 +725,15 @@ export default function Settings() {
                           <div style={{
                             display: "flex",
                             alignItems: "center",
-                            border: yError ? "1px solid red" : "1px solid #d3d3d3",
+                            border: yError ? "1px solid var(--error)" : "1px solid var(--border)",
                             borderRadius: "6px",
                             padding: "4px 8px",
                             width: "110px",
                             justifyContent: "space-between",
                             fontFamily: "sans-serif"
                           }}>
-                            <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.max")}</span>
-                            <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
+                            <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{t("settings.max")}</span>
+                            <div style={{ width: "1px", height: "18px", background: "var(--border)" }} />
                             <input
                               type="number"
                               value={movementParams.y_max || ""}
@@ -738,6 +746,8 @@ export default function Settings() {
                                 textAlign: "right",
                                 fontFamily: "sans-serif",
                                 MozAppearance: "textfield",
+                                background: "transparent",
+                                color: "var(--text)",
                                 WebkitAppearance: "none",
                                 appearance: "none"
                               }}
@@ -754,7 +764,7 @@ export default function Settings() {
                               width: "80px",
                               fontWeight: 600,
                               fontSize: "14px",
-                              color: "#222933",
+                              color: "var(--text)",
                               fontFamily: "sans-serif",
                               marginTop: "-10px"
                             }}>
@@ -763,7 +773,7 @@ export default function Settings() {
                             <div style={{
                               display: "flex",
                               alignItems: "center",
-                              border: pauseError ? "1px solid red" : "1px solid #d3d3d3",
+                              border: pauseError ? "1px solid var(--error)" : "1px solid var(--border)",
                               borderRadius: "6px",
                               padding: "4px 8px",
                               width: "110px",
@@ -782,6 +792,8 @@ export default function Settings() {
                                   textAlign: "right",
                                   fontFamily: "sans-serif",
                                   MozAppearance: "textfield",
+                                  background: "transparent",
+                                  color: "var(--text)",
                                   WebkitAppearance: "none",
                                   appearance: "none"
                                 }}
@@ -799,15 +811,15 @@ export default function Settings() {
 
           {/* Модель трафика */}
           <div style={{ marginBottom: "30px", display: "flex", gap: "20px", alignItems: "flex-start" }}>
-            <h3 style={{ width: "220px", fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", margin: 0, flexShrink: 0 }}>
+            <h3 style={{ width: "220px", fontSize: "15px", fontFamily: "sans-serif", color: "var(--text)", margin: 0, flexShrink: 0 }}>
               {t("settings.trafficModel")}
-              <FiInfo size={16} title={trafficTooltip} style={{ cursor: "help", color: "#00A7C1", marginLeft: "3px" }} />
+              <FiInfo size={16} title={trafficTooltip} style={{ cursor: "help", color: "var(--primary)", marginLeft: "3px" }} />
             </h3>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {trafficModelsKeys.map(({ key, label }) => (
                 <label key={key} style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-                  <div style={{ width: "18px", height: "18px", borderRadius: "50%", border: "2px solid #00A7C1", marginRight: "6px", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: "18px", height: "18px", borderRadius: "50%", border: "2px solid var(--primary)", marginRight: "6px", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <input
                       type="radio"
                       name="traffic"
@@ -818,7 +830,7 @@ export default function Settings() {
                     />
                     {selectedTraffic === key && <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: "#4EC8F0" }} />}
                   </div>
-                  <span style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C" }}>{label}</span>
+                  <span style={{ fontSize: "15px", fontFamily: "sans-serif", color: "var(--text)" }}>{label}</span>
                 </label>
               ))}
             </div>
@@ -828,24 +840,24 @@ export default function Settings() {
           {(selectedTraffic === "poisson" || selectedTraffic === "onOff") && (
             <div style={{ marginTop: "15px", marginBottom: "25px" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                <h3 style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#222933", margin: 0 }}>
+                <h3 style={{ fontSize: "15px", fontFamily: "sans-serif", color: "var(--text)", margin: 0 }}>
                   {t("settings.additionalTrafficParams")}
                 </h3>
                 <div style={{ display: "flex", gap: "30px", flexWrap: "wrap" }}>
                   {selectedTraffic === "poisson" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontFamily: "sans-serif" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                        <span style={{ width: "300px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>
+                        <span style={{ width: "300px", fontWeight: 600, fontSize: "14px", color: "var(--text)" }}>
                           {t("settings.averageTrafficIntensity")}
                         </span>
-                        <div style={{ display: "flex", alignItems: "center", border: trafficErrors.packet_rate ? "1px solid red" : "1px solid #d3d3d3", borderRadius: "6px", padding: "4px 8px", width: "110px", justifyContent: "flex-start", position: "relative" }}>
+                        <div style={{ display: "flex", alignItems: "center", border: trafficErrors.packet_rate ? "1px solid var(--error)" : "1px solid var(--border)", borderRadius: "6px", padding: "4px 8px", width: "110px", justifyContent: "flex-start", position: "relative" }}>
                           <input
                             type="number"
                             value={trafficParams.packet_rate || ""}
                             onChange={(e) => handleTrafficParamChange("packet_rate", e.target.value)}
-                            style={{ width: "80px", border: "none", outline: "none", fontSize: "14px", textAlign: "right", fontFamily: "sans-serif", marginLeft: "-25px" }}
+                            style={{ width: "46px", border: "none", outline: "none", fontSize: "14px", background: "transparent", color: "var(--text)", textAlign: "right", fontFamily: "sans-serif", marginLeft: "0px" }}
                           />
-                          <span style={{ position: "absolute", right: "8px", color: "#999999", fontSize: "12px" }}>
+                          <span style={{ position: "absolute", right: "8px", color: "var(--text-secondary)", fontSize: "12px" }}>
                             {t("settings.packetsPerSec")}
                           </span>
                         </div>
@@ -861,15 +873,14 @@ export default function Settings() {
                         { key: "trafficIntensityActivePhase", label: t("settings.trafficIntensityActivePhase"), unit: t("settings.packetsPerSec") }
                       ].map(({ key, label, unit }) => (
                         <div key={key} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                          <span style={{ width: "300px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>{label}:</span>
-
+                          <span style={{ width: "300px", fontWeight: 600, fontSize: "14px", color: "var(--text)" }}>{label}:</span>
                           <div style={{
                             display: "flex",
                             alignItems: "center",
-                            border: trafficErrors[key] ? "1px solid red" : "1px solid #d3d3d3",
+                            border: trafficErrors[key] ? "1px solid var(--error)" : "1px solid var(--border)",
                             borderRadius: "6px",
                             padding: "4px 8px",
-                            width: "110px",
+                            width: key === "trafficIntensityActivePhase" ? "140px" : "140px",
                             justifyContent: "space-between",
                             position: "relative"
                           }}>
@@ -882,12 +893,14 @@ export default function Settings() {
                                 border: "none",
                                 outline: "none",
                                 fontSize: "14px",
+                                background: "transparent",
+                                color: "var(--text)",
                                 textAlign: "right",
                                 fontFamily: "sans-serif",
-                                marginLeft: unit === "сек" ? "10px" : "-25px" // <-- разное смещение
+                                marginLeft: unit === "сек" ? "10px" : "-2px" // <-- разное смещение
                               }}
                             />
-                            <span style={{ position: "absolute", right: "8px", color: "#999999", fontSize: "12px" }}>{unit}</span>
+                            <span style={{ position: "absolute", right: "8px", color: "var(--text-secondary)", fontSize: "12px" }}>{unit}</span>
                           </div>
                         </div>
                       ))}
@@ -900,9 +913,9 @@ export default function Settings() {
 
           {/* Планировщик */}
           <div style={{ marginBottom: "30px", display: "flex", gap: "20px", alignItems: "flex-start" }}>
-            <h3 style={{ width: "220px", fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", margin: 0, flexShrink: 0 }}>
+            <h3 style={{ width: "220px", fontSize: "15px", fontFamily: "sans-serif", color: "var(--text)", margin: 0, flexShrink: 0 }}>
               {t("settings.scheduler")}
-              <FiInfo size={16} title={schedulerTooltip} style={{ cursor: "help", color: "#00A7C1", marginLeft: "3px" }} />
+              <FiInfo size={16} title={schedulerTooltip} style={{ cursor: "help", color: "var(--primary)", marginLeft: "3px" }} />
             </h3>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -912,7 +925,7 @@ export default function Settings() {
                     width: "18px",
                     height: "18px",
                     borderRadius: "50%",
-                    border: "2px solid #00A7C1",
+                    border: "2px solid var(--primary)",
                     marginRight: "6px",
                     position: "relative",
                     display: "flex",
@@ -929,7 +942,7 @@ export default function Settings() {
                     />
                     {selectedScheduler === scheduler && <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: "#4EC8F0" }} />}
                   </div>
-                  <span style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C" }}>{scheduler}</span>
+                  <span style={{ fontSize: "15px", fontFamily: "sans-serif", color: "var(--text)" }}>{scheduler}</span>
                 </label>
               ))}
             </div>
@@ -946,14 +959,14 @@ export default function Settings() {
                 selectedMovement &&
                 selectedTraffic &&
                 selectedScheduler
-                ? "#00A7C1"
-                : "#80D3E0",
+                ? "var(--primary)"
+                : "var(--primary-h)",
             color: "white",
             fontSize: "18px",
             width: "200px",
             height: "45px",
             borderRadius: "8px",
-            border: "2px solid white",
+            border: "2px solid var(--border)",
             fontFamily: "sans-serif",
             cursor:
               userCount > 0 &&

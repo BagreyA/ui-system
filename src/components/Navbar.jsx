@@ -24,6 +24,8 @@ export default function Navbar({ onVisualizationClick, onDocsClick, onSaveClick,
   const { t } = useTranslation("docs");
   const location = useLocation();
 
+  const isDark = document.body.getAttribute("data-theme") === "dark";
+
   const tabs = [
     { path: "/", key: "home", icon: HomeIcon, iconActive: HomeIconActive },
     { path: "/settings", key: "settings", icon: SettingsIcon, iconActive: SettingsIconActive },
@@ -54,7 +56,7 @@ export default function Navbar({ onVisualizationClick, onDocsClick, onSaveClick,
       style={{
         width: "65px",
         height: "680px",
-        backgroundColor: "#00A7C1",
+        backgroundColor: "var(--primary)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -142,8 +144,8 @@ export default function Navbar({ onVisualizationClick, onDocsClick, onSaveClick,
               padding: "10px 0",
               borderRadius: isActive && tab.path !== "/" ? "30px 0 0 30px" : "30px",
               textDecoration: "none",
-              color: tab.path === "/" ? "white" : (isActive ? "#00A7C1" : "white"),
-              backgroundColor: tab.path === "/" ? "transparent" : (isActive ? "white" : "transparent"),
+              color: tab.path === "/" ? "white" : (isActive ? "var(--primary)" : "white"),
+              backgroundColor: tab.path === "/" ? "transparent" : (isActive ? "var(--bg)" : "transparent"),
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",

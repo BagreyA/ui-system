@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
@@ -37,6 +37,8 @@ function App() {
   const [selectedMovement, setSelectedMovement] = useState("");
   const [selectedTraffic, setSelectedTraffic] = useState("");
   const [selectedScheduler, setSelectedScheduler] = useState("");
+
+  const [theme, setTheme] = useState("light");
 
   // Сохранение всех параметров в JSON
   const handleSave = () => {
@@ -120,11 +122,22 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    document.body.setAttribute("data-theme", theme);
+  }, [theme]);
+
   return (
     <Router>
       <SettingsProvider>
-        <div className="flex">
-          <ThemeToggle />
+        <div 
+          className="flex"
+          style={{
+            minHeight: "100vh",
+            background: "var(--bg)",
+            color: "var(--text)",
+            transition: "background 0.3s ease, color 0.3s ease",
+        }}>
+          <ThemeToggle theme={theme} setTheme={setTheme}/>
           <Navbar
             onVisualizationClick={() => setShowVisualizationParams(!showVisualizationParams)}
             onDocsClick={() => setShowDocsPanel(!showDocsPanel)}
@@ -134,8 +147,7 @@ function App() {
           <main className="flex-1 p-6">
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route
-                path="/settings"
+              <Route path="/settings"
                 element={
                 <Settings
                   movementParams={movementParams}

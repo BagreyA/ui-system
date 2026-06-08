@@ -7,7 +7,7 @@ import Graphs from "../components//Graphs";
 import trashIcon from "../icons/trash.png";
 import pauseIcon from "../icons/pause.png";
 import refreshIcon from "../icons/refresh.png";
-import useGraphData from "../hooks/useGraphData";
+import useSimulationData from "../hooks/useSimulationData";
 
 export default function Visualization({ showParamsPanel }) {
   const { t } = useTranslation("docs");
@@ -180,23 +180,19 @@ export default function Visualization({ showParamsPanel }) {
     }));
   };
 
-  const graphData = useGraphData();
+  const graphData = useSimulationData();
 
   const graphs = [
     { key: "lteGrid", name: t("graphs.lteGrid", "LTE Resource Grid (RB × TTI)") },
-    { key: "sinrGraph", name: t("graphs.sinrGraph", "SINR UE") },
+//    { key: "sinrGraph", name: t("graphs.sinrGraph", "SINR UE") },
     { key: "cellThroughput", name: t("graphs.cellThroughput", "Cell Throughput") },
-    { key: "userThroughputPerUE", name: t("graphs.userThroughputPerUE", "User Throughput") },
+    { key: "cellThroughputAvg", name: t("graphs.cellThroughputAvg", "Cell Throughput (Avg)") },
+//    { key: "userThroughputPerUE", name: t("graphs.userThroughputPerUE", "User Throughput") },
     { key: "userAvgThroughput", name: t("graphs.userAvgThroughput", "Average User Throughput") },
-    { key: "fairnessJain", name: t("graphs.fairnessJain", "Fairness Jain Index") },
+    { key: "userAvgThroughputSmoothed", name: t("graphs.userAvgThroughputSmoothed", "User Throughput (Avg)") },
     { key: "fairnessJainOverall", name: t("graphs.fairnessJainOverall", "General Jain Index for Planners") },
-
-
-    { key: "spectralEfficiency", name: t("graphs.spectralEfficiency", "Spectral Efficiency") },
-    { key: "schedulerEfficiency", name: t("graphs.schedulerEfficiency", "Scheduler Efficiency") },
-    { key: "bufferUsage", name: t("graphs.bufferUsage", "Buffer Usage") },
-    { key: "rbUtilization", name: t("graphs.rbUtilization", "RB Utilization") },
-    { key: "throughputBoxplot", name: t("graphs.throughputBoxplot", "Throughput Boxplot") },
+    { key: "userMobility", name: t("graphs.userMobility", "UE Mobility") },
+    { key: "trafficOnOff", name: t("graphs.trafficOnOff", "Traffic ON/OFF") },
   ];
 
 
@@ -414,34 +410,34 @@ export default function Visualization({ showParamsPanel }) {
       {/* Панель параметров (слева от основного контента) */}
       {showParamsPanel && (
         <div style={{ 
-          width: "300px",
-          backgroundColor: "white", 
+          width: "320px",
+          backgroundColor: "var(--bg)", 
           borderRadius: "0 22px 22px 0", 
           padding: "20px 20px 20px 30px",
           fontFamily: "sans-serif",
           fontSize: "14px",
-          color: "#2A3D4C",
-          border: "2px solid #00A7C1",
+          color: "var(--subtext)",
+          border: "2px solid var(--primary)",
           margin: "10px 20px 10px -17px",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.08)",
-          height: "653px",
+          height: "680px",
           overflow: "auto",
           scrollbarWidth: "thin",
-          scrollbarColor: "#00A7C1 #f0f0f0"
+          scrollbarColor: "var(--primary) var(--card)"
         }}>
           {/* Стили для Webkit браузеров (Chrome, Safari, Edge) */}
           <style>
             {`
               div::-webkit-scrollbar { width: 8px; }
-              div::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 0 4px 4px 0; }
-              div::-webkit-scrollbar-thumb { background: #00A7C1; border-radius: 4px; border: 1px solid #f0f0f0; }
-              div::-webkit-scrollbar-thumb:hover { background: #0095B3; }
+              div::-webkit-scrollbar-track { background: var(--card); border-radius: 0 4px 4px 0; }
+              div::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; border: 1px solid var(--card); }
+              div::-webkit-scrollbar-thumb:hover { background: var(--primary-hover); }
               }
             `}
           </style>
           {/* Выбор графиков (выдвижной список с тегами) */}
           <div style={{ marginBottom: "25px", position: "relative" }}>
-            <h3 style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C", marginBottom: "8px" }}>
+            <h3 style={{ fontSize: "15px", fontFamily: "sans-serif", color: "var(--text)", marginBottom: "8px" }}>
               {t("visualization.selectGraphs", "Выбор графиков для отображения")}
             </h3>
             {/* Контейнер поля и выпадающего списка */}
@@ -453,26 +449,26 @@ export default function Visualization({ showParamsPanel }) {
                   alignItems: "center",
                   gap: "5px",
                   padding: "4px 8px",
-                  border: "2px solid #E6E6E6",
+                  border: "2px solid var(--border)",
                   borderRadius: "8px",
-                  backgroundColor: "white",
+                  backgroundColor: "var(--bg)",
                   cursor: "pointer"
                 }}
                 onClick={() => setIsGraphsOpen(!isGraphsOpen)}
               >
                 {selectedGraphs.length === 0 && (
-                  <span style={{ color: "#A7A7AA", fontSize: "12px" }}>{t("visualization.selectGraphs", "Select graphs to display")}</span>
+                  <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>{t("visualization.selectGraphs", "Select graphs to display")}</span>
                 )}
                 {selectedGraphs.map((key, index) => (
                   <div key={index} 
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        backgroundColor: "#e6f7fa",
+                        backgroundColor: "var(--primary-heee)",
                         borderRadius: "4px",
                         padding: "2px 6px",
                         fontSize: "12px",
-                        color: "#2A3D4C"
+                        color: "var(--subtext)"
                       }}>
                     {t(`graphs.${key}`, key)}
                     <span 
@@ -486,7 +482,7 @@ export default function Visualization({ showParamsPanel }) {
                     height: 0,
                     borderLeft: "6px solid transparent",
                     borderRight: "6px solid transparent",
-                    borderTop: "6px solid #00A7C1",
+                    borderTop: "6px solid var(--primary)",
                     transform: isGraphsOpen ? "rotate(180deg)" : "rotate(0deg)",
                     transition: "transform 0.2s ease"
                   }}
@@ -499,8 +495,8 @@ export default function Visualization({ showParamsPanel }) {
                   top: "100%",
                   left: 0,
                   right: 0,
-                  backgroundColor: "white",
-                  border: "2px solid #d3d3d3",
+                  backgroundColor: "var(--bg)",
+                  border: "2px solid var(--border)",
                   borderTop: "none",
                   borderRadius: "0 0 8px 8px",
                   zIndex: 10,
@@ -515,16 +511,16 @@ export default function Visualization({ showParamsPanel }) {
                         padding: "8px 12px",
                         cursor: "pointer",
                         fontSize: "12px",
-                        color: "#2A3D4C",
-                        borderBottom: "1px solid #f0f0f0",
-                        backgroundColor: selectedGraphs.includes(graph.key) ? "#e6f7fa" : "white",
+                        color: "var(--subtext)",
+                        borderBottom: "1px solid var(--bg)",
+                        backgroundColor: selectedGraphs.includes(graph.key) ? "var(--card)" : "var(--bg)",
                         display: "flex",
                         alignItems: "center",
                         transition: "background-color 0.2s ease"
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f8f9fa"}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--bg)"}
                       onMouseLeave={(e) =>
-                        e.currentTarget.style.backgroundColor = selectedGraphs.includes(graph.key) ? "#e6f7fa" : "white"
+                        e.currentTarget.style.backgroundColor = selectedGraphs.includes(graph.key) ? "var(--card)" : "var(--bg)"
                       }
                     >
                       <input
@@ -550,7 +546,7 @@ export default function Visualization({ showParamsPanel }) {
                 fontSize: "14px", 
                 fontWeight: "bold", 
                 marginBottom: "8px", 
-                color: "#222933", 
+                color: "var(--text)", 
                 cursor: "pointer" 
               }}
               onClick={() => toggleSection("movement")}
@@ -596,7 +592,7 @@ export default function Visualization({ showParamsPanel }) {
                         }}/>
                       )}
                     </div>
-                    <span style={{ fontSize: "14px", color: "#2A3D4C" }}>{model.label}</span>
+                    <span style={{ fontSize: "14px", color: "var(--subtext)" }}>{model.label}</span>
                   </label>
                 ))}
               {/* Дополнительные параметры для выбранной модели */}
@@ -605,18 +601,19 @@ export default function Visualization({ showParamsPanel }) {
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   {/* X min */}
                   <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <span style={{ width: "100px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>{t("settings.movement.x", "x:")}</span>
+                    <span style={{ width: "100px", fontWeight: 600, fontSize: "14px", color: "var(--subtext)" }}>{t("settings.movement.x", "x:")}</span>
                     <div style={{
                       display: "flex",
                       alignItems: "center",
-                      border: movementErrors.x ? "1px solid red" : "1px solid #d3d3d3",
+                      border: movementErrors.x ? "1px solid var(--error)" : "1px solid var(--border)",
                       borderRadius: "6px",
                       padding: "4px 8px",
                       width: "110px",
-                      justifyContent: "space-between"
+                      justifyContent: "space-between",
+                      fontFamily: "sans-serif"
                     }}>
-                      <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.movement.min", "min")}</span>
-                      <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
+                      <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{t("settings.movement.min", "min")}</span>
+                      <div style={{ width: "1px", height: "18px", background: "var(--border)" }} />
                       <input
                         type="number"
                         value={movementParams[`x_min`] ?? ""}
@@ -626,7 +623,13 @@ export default function Visualization({ showParamsPanel }) {
                           border: "none",
                           outline: "none",
                           fontSize: "14px",
-                          textAlign: "right"
+                          textAlign: "right",
+                          fontFamily: "sans-serif",
+                          MozAppearance: "textfield",
+                          background: "transparent",
+                          color: "var(--text)",
+                          WebkitAppearance: "none",
+                          appearance: "none"
                         }}
                       />
                     </div>
@@ -637,14 +640,15 @@ export default function Visualization({ showParamsPanel }) {
                     <div style={{
                       display: "flex",
                       alignItems: "center",
-                      border: movementErrors.x ? "1px solid red" : "1px solid #d3d3d3",
+                      border: movementErrors.x ? "1px solid var(--error)" : "1px solid var(--border)",
                       borderRadius: "6px",
                       padding: "4px 8px",
                       width: "110px",
-                      justifyContent: "space-between"
+                      justifyContent: "space-between",
+                      fontFamily: "sans-serif"
                     }}>
-                      <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.movement.max", "max")}</span>
-                      <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
+                      <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{t("settings.movement.max", "max")}</span>
+                      <div style={{ width: "1px", height: "18px", background: "var(--border)" }} />
                       <input
                         type="number"
                         value={movementParams[`x_max`] ?? ""}
@@ -654,7 +658,13 @@ export default function Visualization({ showParamsPanel }) {
                           border: "none",
                           outline: "none",
                           fontSize: "14px",
-                          textAlign: "right"
+                          textAlign: "right",
+                          fontFamily: "sans-serif",
+                          MozAppearance: "textfield",
+                          background: "transparent",
+                          color: "var(--text)",
+                          WebkitAppearance: "none",
+                          appearance: "none"
                         }}
                       />
                     </div>
@@ -663,18 +673,19 @@ export default function Visualization({ showParamsPanel }) {
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   {/* Y min */}
                   <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <span style={{ width: "100px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>{t("settings.movement.y", "y:")}</span>
+                    <span style={{ width: "100px", fontWeight: 600, fontSize: "14px", color: "var(--subtext)" }}>{t("settings.movement.y", "y:")}</span>
                     <div style={{
                       display: "flex",
                       alignItems: "center",
-                      border: movementErrors.y ? "1px solid red" : "1px solid #d3d3d3",
+                      border: movementErrors.y ? "1px solid var(--error)" : "1px solid var(--border)",
                       borderRadius: "6px",
                       padding: "4px 8px",
                       width: "110px",
-                      justifyContent: "space-between"
+                      justifyContent: "space-between",
+                      fontFamily: "sans-serif"
                     }}>
-                      <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.movement.min", "min")}</span>
-                      <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
+                      <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{t("settings.movement.min", "min")}</span>
+                      <div style={{ width: "1px", height: "18px", background: "var(--border)" }} />
                       <input
                         type="number"
                         value={movementParams[`y_min`] ?? ""}
@@ -684,7 +695,13 @@ export default function Visualization({ showParamsPanel }) {
                           border: "none",
                           outline: "none",
                           fontSize: "14px",
-                          textAlign: "right"
+                          textAlign: "right",
+                          fontFamily: "sans-serif",
+                          MozAppearance: "textfield",
+                          background: "transparent",
+                          color: "var(--text)",
+                          WebkitAppearance: "none",
+                          appearance: "none"
                         }}
                       />
                     </div>
@@ -695,14 +712,15 @@ export default function Visualization({ showParamsPanel }) {
                     <div style={{
                       display: "flex",
                       alignItems: "center",
-                      border: movementErrors.y ? "1px solid red" : "1px solid #d3d3d3",
+                      border: movementErrors.y ? "1px solid var(--error)" : "1px solid var(--border)",
                       borderRadius: "6px",
                       padding: "4px 8px",
                       width: "110px",
-                      justifyContent: "space-between"
+                      justifyContent: "space-between",
+                      fontFamily: "sans-serif"
                     }}>
-                      <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.movement.max", "max")}</span>
-                      <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
+                      <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{t("settings.movement.max", "max")}</span>
+                      <div style={{ width: "1px", height: "18px", background: "var(--border)" }} />
                       <input
                         type="number"
                         value={movementParams[`y_max`] ?? ""}
@@ -712,7 +730,13 @@ export default function Visualization({ showParamsPanel }) {
                           border: "none",
                           outline: "none",
                           fontSize: "14px",
-                          textAlign: "right"
+                          textAlign: "right",
+                          fontFamily: "sans-serif",
+                          MozAppearance: "textfield",
+                          background: "transparent",
+                          color: "var(--text)",
+                          WebkitAppearance: "none",
+                          appearance: "none"
                         }}
                       />
                     </div>
@@ -720,19 +744,18 @@ export default function Visualization({ showParamsPanel }) {
                 </div>
                 {/* pause_time */}
                 {["RandomWaypoint", "RandomDirection"].includes(selectedMovement) && (
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <span style={{ width: "100px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>{t("settings.movement.pause", "pause:")}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "25px" }}>
+                    <span style={{ width: "80px", fontWeight: 600, fontSize: "14px", color: "var(--subtext)", fontFamily: "sans-serif", marginTop: "-10px" }}>{t("settings.movement.pause", "pause:")}</span>
                     <div style={{
                       display: "flex",
                       alignItems: "center",
-                      border: movementErrors.pause_time ? "1px solid red" : "1px solid #d3d3d3",
+                      border: movementErrors.pause_time ? "1px solid var(--error)" : "1px solid var(--border)",
                       borderRadius: "6px",
                       padding: "4px 8px",
                       width: "110px",
-                      justifyContent: "space-between"
+                      justifyContent: "flex-end",
+                      fontFamily: "sans-serif"
                     }}>
-                      <span style={{ fontSize: "12px", color: "#999" }}>{t("settings.movement.sec", "sec")}</span>
-                      <div style={{ width: "1px", height: "18px", background: "#ddd" }} />
                       <input
                         type="number"
                         value={movementParams.pause_time ?? ""}
@@ -742,7 +765,13 @@ export default function Visualization({ showParamsPanel }) {
                           border: "none",
                           outline: "none",
                           fontSize: "14px",
-                          textAlign: "right"
+                          textAlign: "right",
+                          fontFamily: "sans-serif",
+                          MozAppearance: "textfield",
+                          background: "transparent",
+                          color: "var(--text)",
+                          WebkitAppearance: "none",
+                          appearance: "none"
                         }}
                       />
                     </div>
@@ -753,17 +782,17 @@ export default function Visualization({ showParamsPanel }) {
                   <>
                     {/* alpha */}
                     <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <span style={{ width: "100px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>{t("settings.movement.alpha", "memory:")}</span>
+                      <span style={{ width: "100px", fontWeight: 600, fontSize: "14px", color: "var(--subtext)" }}>{t("settings.movement.alpha", "memory:")}</span>
                       <div style={{
                         display: "flex",
                         alignItems: "center",
-                        border: movementErrors.alpha ? "1px solid red" : "1px solid #d3d3d3",
+                        border: movementErrors.alpha ? "1px solid var(--error)" : "1px solid var(--border)",
                         borderRadius: "6px",
                         padding: "4px 8px",
                         width: "110px",
-                        justifyContent: "space-between"
+                        justifyContent: "flex-end",
+                        fontFamily: "sans-serif"
                       }}>
-                        <span></span>
                         <div/>
                         <input
                           type="number"
@@ -774,24 +803,30 @@ export default function Visualization({ showParamsPanel }) {
                             border: "none",
                             outline: "none",
                             fontSize: "14px",
-                            textAlign: "right"
+                            textAlign: "right",
+                            fontFamily: "sans-serif",
+                            MozAppearance: "textfield",
+                            background: "transparent",
+                            color: "var(--text)",
+                            WebkitAppearance: "none",
+                            appearance: "none"
                           }}
                         />
                       </div>
                     </div>
                     {/* boundary_threshold */}
                     <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <span style={{ width: "100px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>{t("settings.movement.boundaryThreshold", "boundary:")}</span>
+                      <span style={{ width: "100px", fontWeight: 600, fontSize: "14px", color: "var(--subtext)" }}>{t("settings.movement.boundaryThreshold", "boundary:")}</span>
                       <div style={{
                         display: "flex",
                         alignItems: "center",
-                        border: movementErrors.boundary_threshold ? "1px solid red" : "1px solid #d3d3d3",
+                        border: movementErrors.boundary_threshold ? "1px solid var(--error)" : "1px solid var(--border)",
                         borderRadius: "6px",
                         padding: "4px 8px",
                         width: "110px",
-                        justifyContent: "space-between"
+                        justifyContent: "flex-end",
+                        fontFamily: "sans-serif"
                       }}>
-                        <span></span>
                         <div/>
                         <input
                           type="number"
@@ -802,7 +837,13 @@ export default function Visualization({ showParamsPanel }) {
                             border: "none",
                             outline: "none",
                             fontSize: "14px",
-                            textAlign: "right"
+                            textAlign: "right",
+                            fontFamily: "sans-serif",
+                            MozAppearance: "textfield",
+                            background: "transparent",
+                            color: "var(--text)",
+                            WebkitAppearance: "none",
+                            appearance: "none"
                           }}
                         />
                       </div>
@@ -824,7 +865,7 @@ export default function Visualization({ showParamsPanel }) {
                 fontSize: "14px",
                 fontWeight: "bold",
                 cursor: "pointer",
-                color: "#222933",
+                color: "var(--text)",
                 marginBottom: "4px"
               }}
               onClick={() => toggleSection("traffic")}
@@ -875,7 +916,7 @@ export default function Visualization({ showParamsPanel }) {
                             <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: "#4EC8F0" }} />
                           )}
                         </div>
-                        <span style={{ fontSize: "15px", fontFamily: "sans-serif", color: "#2A3D4C" }}>
+                        <span style={{ fontSize: "15px", fontFamily: "sans-serif", color: "var(--subtext)" }}>
                           {tm.label}
                         </span>
                       </label>
@@ -890,18 +931,18 @@ export default function Visualization({ showParamsPanel }) {
                       {selectedTraffic === "poisson" && (
                         <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontFamily: "sans-serif" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                            <span style={{ width: "120px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>
+                            <span style={{ width: "120px", fontWeight: 600, fontSize: "14px", color: "var(--subtext)" }}>
                               {t("settings.traffic.poissonAvgRate")}:
                             </span>
                             <div
                               style={{
                                 display: "flex",
                                 alignItems: "center",
-                                border: getTrafficError("packet_rate") ? "1px solid red" : "1px solid #d3d3d3",
+                                border: getTrafficError("packet_rate") ? "1px solid var(--error)" : "1px solid var(--border)",
                                 borderRadius: "6px",
                                 padding: "4px 8px",
                                 width: "110px",
-                                justifyContent: "space-between",
+                                justifyContent: "flex-start",
                                 position: "relative"
                               }}
                             >
@@ -909,9 +950,9 @@ export default function Visualization({ showParamsPanel }) {
                                 type="number"
                                 value={trafficParams[selectedTraffic]?.packet_rate || ""}
                                 onChange={(e) => handleTrafficParamChange("packet_rate", parseFloat(e.target.value))}
-                                style={{ width: "80px", border: "none", outline: "none", fontSize: "14px", textAlign: "right", fontFamily: "sans-serif", marginLeft: "-25px" }}
+                                style={{ width: "46px", border: "none", outline: "none", fontSize: "14px", background: "transparent", color: "var(--text)", textAlign: "right", fontFamily: "sans-serif", marginLeft: "0px" }}
                               />
-                              <span style={{ position: "absolute", right: "8px", color: "#999999", fontSize: "12px" }}>
+                              <span style={{ position: "absolute", right: "8px", color: "var(--text-secondary)", fontSize: "12px" }}>
                                 {t("settings.traffic.packetsPerSecond")}
                               </span>
                             </div>
@@ -927,14 +968,14 @@ export default function Visualization({ showParamsPanel }) {
                             { label: t("settings.traffic.onPacketRate"), unit: t("settings.traffic.packetsPerSecond"), key: "packet_rate" }
                           ].map(({ label, unit, key }) => (
                             <div key={key} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                              <span style={{ width: "120px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>
+                              <span style={{ width: "120px", fontWeight: 600, fontSize: "14px", color: "var(--subtext)" }}>
                                 {label}:
                               </span>
                               <div
                                 style={{
                                   display: "flex",
                                   alignItems: "center",
-                                  border: getTrafficError(key) ? "1px solid red" : "1px solid #d3d3d3",
+                                  border: getTrafficError(key) ? "var(--error)" : "1px solid var(--border)",
                                   borderRadius: "6px",
                                   padding: "4px 8px",
                                   width: "110px",
@@ -946,9 +987,9 @@ export default function Visualization({ showParamsPanel }) {
                                   type="number"
                                   value={trafficParams[selectedTraffic]?.[key] || ""}
                                   onChange={(e) => handleTrafficParamChange(key, parseFloat(e.target.value))}
-                                  style={{ width: "80px", border: "none", outline: "none", fontSize: "14px", textAlign: "right", fontFamily: "sans-serif", marginLeft: unit === "сек" ? "10px" : "-25px" }}
+                                  style={{ width: "80px", border: "none", outline: "none", fontSize: "14px", background: "transparent", color: "var(--text)", textAlign: "right", fontFamily: "sans-serif", marginLeft: unit === "сек" ? "10px" : "-2px" }}
                                 />
-                                <span style={{ position: "absolute", right: "8px", color: "#999999", fontSize: "12px" }}>
+                                <span style={{ position: "absolute", right: "8px", color: "var(--text-secondary)", fontSize: "12px" }}>
                                   {unit}
                                 </span>
                               </div>
@@ -966,7 +1007,7 @@ export default function Visualization({ showParamsPanel }) {
           {/* Секция: Пользовательское устройство */}
           <div style={{ marginBottom: "10px" }}>
             <div 
-              style={{ display: "flex", alignItems: "center", fontSize: "14px", fontWeight: "bold", cursor: "pointer", color: "#222933", marginBottom: "4px" }}
+              style={{ display: "flex", alignItems: "center", fontSize: "14px", fontWeight: "bold", cursor: "pointer", color: "var(--text)", marginBottom: "4px" }}
               onClick={() => toggleSection("ue")}
             >
               <span 
@@ -993,19 +1034,19 @@ export default function Visualization({ showParamsPanel }) {
                         alignItems: "center",
                         gap: "5px",
                         padding: "6px 10px",
-                        border: "2px solid #E6E6E6",
+                        border: "2px solid var(--border)",
                         borderRadius: "8px",
-                        backgroundColor: "white",
+                        backgroundColor: "var(--bg)",
                         cursor: "pointer",
                         fontSize: "14px",
-                        color: "#2A3D4C"
+                        color: "var(--subtext)"
                       }}
                       onClick={() => setIsUsersOpen(!isUsersOpen)}
                     >
                       {selectedUser ? (
                         <span>{selectedUser}</span>
                       ) : (
-                        <span style={{ color: "#999", fontSize: "12px" }}>
+                        <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>
                           {t("visualization.selectUser")}
                         </span>
                       )}
@@ -1016,7 +1057,7 @@ export default function Visualization({ showParamsPanel }) {
                           height: 0,
                           borderLeft: "6px solid transparent",
                           borderRight: "6px solid transparent",
-                          borderTop: "6px solid #00A7C1",
+                          borderTop: "6px solid var(--primary)",
                           transform: isUsersOpen ? "rotate(180deg)" : "rotate(0deg)",
                           transition: "transform 0.2s ease"
                         }}
@@ -1030,8 +1071,8 @@ export default function Visualization({ showParamsPanel }) {
                           top: "100%",
                           left: 0,
                           right: 0,
-                          backgroundColor: "white",
-                          border: "2px solid #d3d3d3",
+                          backgroundColor: "var(--bg)",
+                          border: "2px solid var(--border)",
                           borderTop: "none",
                           borderRadius: "0 0 8px 8px",
                           zIndex: 10,
@@ -1057,15 +1098,15 @@ export default function Visualization({ showParamsPanel }) {
                               padding: "8px 12px",
                               cursor: "pointer",
                               fontSize: "13px",
-                              color: "#2A3D4C",
-                              borderBottom: "1px solid #f0f0f0",
+                              color: "var(--subtext)",
+                              borderBottom: "1px solid var(--bg)",
                               transition: "background-color 0.2s ease",
-                              backgroundColor: selectedUser === ue ? "#e6f7fa" : "white"
+                              backgroundColor: selectedUser === ue ? "var(--card)" : "var(--bg)"
                             }}
-                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f8f9fa")}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg)")}
                             onMouseLeave={(e) =>
                               (e.currentTarget.style.backgroundColor =
-                                selectedUser === ue ? "#e6f7fa" : "white")
+                                selectedUser === ue ? "var(--card)" : "var(--bg)")
                             }
                           >
                             {ue}
@@ -1082,29 +1123,30 @@ export default function Visualization({ showParamsPanel }) {
                         width: "129px",
                         fontWeight: 600,
                         fontSize: "14px",
-                        color: "#222933",
+                        color: "var(--subtext)",
                         marginTop: "6px"
                       }}
                     >
                       {t("visualization.coordinates")}
                     </span>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontFamily: "sans-serif" }}>
                       {/* X */}
                       <div
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          border: ueErrors.x ? "1px solid red" : "1px solid #d3d3d3",
+                          border: ueErrors.x ? "1px solid var(--error)" : "1px solid var(--border)",
                           borderRadius: "6px",
                           padding: "4px 8px",
                           width: "110px",
                           position: "relative",
-                          background: "white",
-                          justifyContent: "space-between"
+                          background: "var(--bg)",
+                          justifyContent: "space-between",
+                          fontFamily: "sans-serif"
                         }}
                       >
-                        <span style={{ fontSize: "14px", color: "#999" }}>{t("visualization.x")}</span>
-                        <div style={{ width: "1px", height: "18px", background: "#ddd", margin: "0 6px" }} />
+                        <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>{t("visualization.x")}</span>
+                        <div style={{ width: "1px", height: "18px", background: "var(--border)", margin: "0 6px" }} />
                         <input
                           type="number"
                           value={ueParams.x || 0.0}
@@ -1115,27 +1157,34 @@ export default function Visualization({ showParamsPanel }) {
                             outline: "none",
                             fontSize: "14px",
                             textAlign: "right",
-                            paddingRight: "0px"
+                            paddingRight: "0px",
+                            fontFamily: "sans-serif",
+                            MozAppearance: "textfield",
+                            background: "transparent",
+                            color: "var(--text)",
+                            WebkitAppearance: "none",
+                            appearance: "none"
                           }}
                         />
-                        <span style={{ color: "#999", fontSize: "12px", marginLeft: "-10px" }}>{t("visualization.meters")}</span>
+                        <span style={{ color: "var(--text-secondary)", fontSize: "12px", marginLeft: "-10px" }}>{t("visualization.meters")}</span>
                       </div>
                       {/* Y */}
                       <div
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          border: ueErrors.y ? "1px solid red" : "1px solid #d3d3d3",
+                          border: ueErrors.x ? "1px solid var(--error)" : "1px solid var(--border)",
                           borderRadius: "6px",
                           padding: "4px 8px",
                           width: "110px",
                           position: "relative",
-                          background: "white",
-                          justifyContent: "space-between"
+                          background: "var(--bg)",
+                          justifyContent: "space-between",
+                          fontFamily: "sans-serif"
                         }}
                       >
-                        <span style={{ fontSize: "14px", color: "#999" }}>{t("visualization.y")}</span>
-                        <div style={{ width: "1px", height: "18px", background: "#ddd", margin: "0 6px" }} />
+                        <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>{t("visualization.y")}</span>
+                        <div style={{ width: "1px", height: "18px", background: "var(--border)", margin: "0 6px" }} />
                         <input
                           type="number"
                           value={ueParams.y || 0.0}
@@ -1146,21 +1195,27 @@ export default function Visualization({ showParamsPanel }) {
                             outline: "none",
                             fontSize: "14px",
                             textAlign: "right",
-                            paddingRight: "0px"
+                            paddingRight: "0px",
+                            fontFamily: "sans-serif",
+                            MozAppearance: "textfield",
+                            background: "transparent",
+                            color: "var(--text)",
+                            WebkitAppearance: "none",
+                            appearance: "none"
                           }}
                         />
-                        <span style={{ color: "#999", fontSize: "12px", marginLeft: "-10px" }}>{t("visualization.meters")}</span>
+                        <span style={{ color: "var(--text-secondary)", fontSize: "12px", marginLeft: "-10px" }}>{t("visualization.meters")}</span>
                       </div>
                     </div>
                   </div>
                     {/* Buffer size */}
                     <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <span style={{ width: "124px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>{t("visualization.bufferSize")}:</span>
+                      <span style={{ width: "124px", fontWeight: 600, fontSize: "14px", color: "var(--subtext)" }}>{t("visualization.bufferSize")}:</span>
                       <div style={{ marginLeft: "5px" }}>
                       <div style={{
                         display: "flex",
                         alignItems: "center",
-                        border: ueErrors.buffer_size ? "1px solid red" : "1px solid #d3d3d3",
+                        border: ueErrors.buffer_size ? "1px solid var(--error)" : "1px solid var(--border)",
                         borderRadius: "6px",
                         padding: "4px 4px 4px 8px",
                         width: "113px",
@@ -1177,16 +1232,22 @@ export default function Visualization({ showParamsPanel }) {
                             outline: "none",
                             fontSize: "14px",
                             textAlign: "right",
-                            paddingRight: "0px"
+                            paddingRight: "0px",
+                            fontFamily: "sans-serif",
+                            MozAppearance: "textfield",
+                            background: "transparent",
+                            color: "var(--text)",
+                            WebkitAppearance: "none",
+                            appearance: "none"
                           }}
                         />  
-                        <span style={{ position: "absolute", right: "8px", color: "#999", fontSize: "12px" }}>{t("visualization.bytes", "байт")}</span>
+                        <span style={{ position: "absolute", right: "8px", color: "var(--text-secondary", fontSize: "12px" }}>{t("visualization.bytes", "байт")}</span>
                       </div>
                     </div>
                   </div>
                     {/* Выбор класса UE */}
                     <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <span style={{ width: "99px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>
+                      <span style={{ width: "99px", fontWeight: 600, fontSize: "14px", color: "var(--subtext)" }}>
                       {t("visualization.ueClass")}:
                       </span>
                       <div style={{ marginLeft: "25px" }}></div>
@@ -1194,17 +1255,17 @@ export default function Visualization({ showParamsPanel }) {
                         style={{
                           width: "110px",
                           padding: "4px 8px",
-                          border: "1px solid #d3d3d3",
+                          border: "1px solid var(--border)",
                           borderRadius: "6px",
                           fontSize: "14px",
-                          color: "#2A3D4C",
+                          color: "var(--text)",
                           cursor: "pointer",
-                          backgroundColor: "white",
+                          backgroundColor: "var(--bg)",
                           position: "relative"
                         }}
                         onClick={() => setIsClassOpen(!isClassOpen)}
                       >
-                        {ueParams.ue_class || <span style={{ color: "#A7A7AA", fontSize: "12px" }}>{t("visualization.ueClass")}</span>}
+                        {ueParams.ue_class || <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>{t("visualization.ueClass")}</span>}
                         <span
                           style={{
                             position: "absolute",
@@ -1224,8 +1285,8 @@ export default function Visualization({ showParamsPanel }) {
                               top: "100%",
                               left: 0,
                               right: 0,
-                              backgroundColor: "white",
-                              border: "1px solid #d3d3d3",
+                              backgroundColor: "var(--bg)",
+                              border: "1px solid var(--border)",
                               borderTop: "none",
                               borderRadius: "0 0 6px 6px",
                               zIndex: 10,
@@ -1241,12 +1302,12 @@ export default function Visualization({ showParamsPanel }) {
                                   padding: "8px 10px",
                                   cursor: "pointer",
                                   fontSize: "14px",
-                                  color: "#2A3D4C",
-                                  backgroundColor: ueParams.ue_class === cls ? "#e6f7fa" : "white"
+                                  color: "var(--text)",
+                                  backgroundColor: ueParams.ue_class === cls ? "var(--card)" : "var(--bg)"
                                 }}
-                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f8f9fa")}
+                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg)")}
                                 onMouseLeave={(e) =>
-                                  (e.currentTarget.style.backgroundColor = ueParams.ue_class === cls ? "#e6f7fa" : "white")
+                                  (e.currentTarget.style.backgroundColor = ueParams.ue_class === cls ? "var(--card)" : "var(--bg)")
                                 }
                               >
                                 {cls}
@@ -1272,7 +1333,7 @@ export default function Visualization({ showParamsPanel }) {
                   fontFamily: "sans-serif",
                   fontWeight: "bold",
                   cursor: "pointer",
-                  color: "#222933",
+                  color: "var(--text)",
                   marginBottom: "4px"
                 }}
                 onClick={() => toggleSection(section)}
@@ -1288,7 +1349,7 @@ export default function Visualization({ showParamsPanel }) {
                   ▶
                 </span>
                 {section === "scheduler" ? t("visualization.schedulerSection") : section === "channel" ? t("visualization.channelParams") : t("visualization.enodebSection")}
-                <FiInfo size={16} title={sectionTooltips[section]} style={{cursor: "help", color: "#00A7C1", marginLeft: "3px"}}/>
+                <FiInfo size={16} title={sectionTooltips[section]} style={{cursor: "help", color: "var(--primary)", marginLeft: "3px"}}/>
               </div>
               {expandedSections[section] && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "4px" }}>
@@ -1299,7 +1360,7 @@ export default function Visualization({ showParamsPanel }) {
                         width: "18px",
                         height: "18px",
                         borderRadius: "50%",
-                        border: "2px solid #00A7C1",
+                        border: "2px solid var(--primary)",
                         marginRight: "6px",
                         position: "relative",
                         display: "flex",
@@ -1318,7 +1379,7 @@ export default function Visualization({ showParamsPanel }) {
                           <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: "#4EC8F0" }} />
                         )}
                       </div>
-                      <span style={{ fontSize: "14px", fontFamily: "sans-serif", color: "#2A3D4C" }}>{scheduler}</span>
+                      <span style={{ fontSize: "14px", fontFamily: "sans-serif", color: "var(--subtext)" }}>{scheduler}</span>
                     </label>
                   ))}
                   {/* Параметры канала с выбором модели */}
@@ -1335,7 +1396,7 @@ export default function Visualization({ showParamsPanel }) {
                                 width: "18px",
                                 height: "18px",
                                 borderRadius: "50%",
-                                border: "2px solid #00A7C1",
+                                border: "2px solid var(--primary)",
                                 marginRight: "6px",
                                 position: "relative",
                                 display: "flex",
@@ -1368,7 +1429,7 @@ export default function Visualization({ showParamsPanel }) {
                                 />
                               )}
                             </div>
-                            <span style={{ fontSize: "14px", fontFamily: "sans-serif", color: "#2A3D4C" }}>
+                            <span style={{ fontSize: "14px", fontFamily: "sans-serif", color: "var(--subtext)" }}>
                               {t(`channel.${model}`)}
                             </span>
                           </label>
@@ -1388,20 +1449,21 @@ export default function Visualization({ showParamsPanel }) {
                               const label = labelMap[key] || key;
                               return (
                                 <div key={key} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                                  <span style={{ width: "120px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>
+                                  <span style={{ width: "120px", fontWeight: 600, fontSize: "14px", color: "var(--subtext)" }}>
                                     {label}:
                                   </span>
                                   <div
                                     style={{
                                       display: "flex",
                                       alignItems: "center",
-                                      border: channelErrors[key] ? "1px solid red" : "1px solid #d3d3d3",
+                                      border: channelErrors[key] ? "1px solid var(--error)" : "1px solid var(--border)",
                                       borderRadius: "6px",
                                       padding: "4px 8px",
                                       width: "110px",
-                                      justifyContent: "flex-end",
+                                      justifyContent: "space-between",
                                       marginLeft: "10px",
-                                      position: "relative"
+                                      position: "relative",
+                                      fontFamily: "sans-serif"
                                     }}
                                   >
                                     <input
@@ -1413,33 +1475,33 @@ export default function Visualization({ showParamsPanel }) {
                                           [selectedChannelModel]: { ...prev[selectedChannelModel], [key]: parseFloat(e.target.value) }
                                         }))
                                       }
-                                      style={{ width: "70%", border: "none", outline: "none", fontSize: "14px", textAlign: "right", paddingRight: "15px" }}
+                                      style={{ width: "100px", border: "none", outline: "none", fontSize: "14px", textAlign: "right", paddingRight: "15px", MozAppearance: "textfield", background: "transparent", color: "var(--text)", WebkitAppearance: "none", appearance: "none" }}
                                     />
-                                    <span style={{ position: "absolute", right: "8px", color: "#999", fontSize: "12px" }}>{unit}</span>
+                                    <span style={{ position: "absolute", right: "8px", color: "var(--text-secondary)", fontSize: "12px" }}>{unit}</span>
                                   </div>
                                 </div>
                               );
                             })}
                           {/* o2i_model */}
                           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                            <span style={{ width: "130px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>
+                            <span style={{ width: "130px", fontWeight: 600, fontSize: "14px", color: "var(--subtext)" }}>
                               {t("visualization.o2iModel")}:
                             </span>
                             <div
                               style={{
                                 width: "110px",
                                 padding: "4px 8px",
-                                border: "1px solid #d3d3d3",
+                                border: "1px solid var(--border)",
                                 borderRadius: "6px",
                                 fontSize: "14px",
-                                color: "#2A3D4C",
+                                color: "var(--text)",
                                 cursor: "pointer",
-                                backgroundColor: "white",
+                                backgroundColor: "var(--bg)",
                                 position: "relative"
                               }}
                               onClick={() => setIsO2iOpen(!isO2iOpen)}
                             >
-                              {channelParams[selectedChannelModel].o2i_model || <span style={{ color: "#A7A7AA", fontSize: "12px" }}>{t("visualization.selectModel")}</span>}
+                              {channelParams[selectedChannelModel].o2i_model || <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>{t("visualization.selectModel")}</span>}
                               <span
                                 style={{
                                   position: "absolute",
@@ -1459,8 +1521,8 @@ export default function Visualization({ showParamsPanel }) {
                                     top: "100%",
                                     left: 0,
                                     right: 0,
-                                    backgroundColor: "white",
-                                    border: "1px solid #d3d3d3",
+                                    backgroundColor: "var(--bg)",
+                                    border: "1px solid var(--border)",
                                     borderTop: "none",
                                     borderRadius: "0 0 6px 6px",
                                     zIndex: 10,
@@ -1482,13 +1544,13 @@ export default function Visualization({ showParamsPanel }) {
                                         padding: "8px 10px",
                                         cursor: "pointer",
                                         fontSize: "14px",
-                                        color: "#2A3D4C",
-                                        backgroundColor: channelParams[selectedChannelModel].o2i_model === option ? "#e6f7fa" : "white"
+                                        color: "var(--text)",
+                                        backgroundColor: channelParams[selectedChannelModel].o2i_model === option ? "var(--card)" : "var(--bg)"
                                       }}
-                                      onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#f8f9fa")}
+                                      onMouseEnter={e => (e.currentTarget.style.backgroundColor = "var(--bg)")}
                                       onMouseLeave={e =>
                                         (e.currentTarget.style.backgroundColor =
-                                          channelParams[selectedChannelModel].o2i_model === option ? "#e6f7fa" : "white")
+                                          channelParams[selectedChannelModel].o2i_model === option ? "var(--card)" : "var(--bg)")
                                       }
                                     >
                                       {t(`visualization.o2i${option.charAt(0).toUpperCase() + option.slice(1)}`)}
@@ -1506,7 +1568,7 @@ export default function Visualization({ showParamsPanel }) {
                                   width: "130px",
                                   fontWeight: 600,
                                   fontSize: "14px",
-                                  color: "#222933",
+                                  color: "var(--subtext)",
                                   marginTop: "6px"
                                 }}
                               >
@@ -1519,16 +1581,16 @@ export default function Visualization({ showParamsPanel }) {
                                     style={{
                                       display: "flex",
                                       alignItems: "center",
-                                      border: channelErrors[key] ? "1px solid red" : "1px solid #d3d3d3",
+                                      border: channelErrors[key] ? "1px solid var(--error)" : "1px solid var(--border)",
                                       borderRadius: "6px",
                                       padding: "4px 8px",
                                       width: "110px",
-                                      background: "white",
+                                      background: "var(--bg)",
                                       justifyContent: "space-between"
                                     }}
                                   >
-                                    <span style={{ fontSize: "14px", color: "#999" }}>{key.toLowerCase()}</span>
-                                    <div style={{ width: "1px", height: "18px", background: "#ddd", margin: "0 6px" }} />
+                                    <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>{key.toLowerCase()}</span>
+                                    <div style={{ width: "1px", height: "18px", background: "var(--border)", margin: "0 6px" }} />
                                     <input
                                       type="number"
                                       value={channelParams[selectedChannelModel][key]}
@@ -1547,10 +1609,16 @@ export default function Visualization({ showParamsPanel }) {
                                         outline: "none",
                                         fontSize: "14px",
                                         textAlign: "right",
-                                        paddingRight: "-10px"
+                                        paddingRight: "-10px",
+                                        fontFamily: "sans-serif",
+                                        MozAppearance: "textfield",
+                                        background: "transparent",
+                                        color: "var(--text)",
+                                        WebkitAppearance: "none",
+                                        appearance: "none"
                                       }}
                                     />
-                                    <span style={{ color: "#999", fontSize: "12px", marginLeft: "-10px" }}>{t("visualization.meters")}</span>
+                                    <span style={{ color: "var(--text-secondary)", fontSize: "12px", marginLeft: "-10px" }}>{t("visualization.meters")}</span>
                                   </div>
                                 ))}
                               </div>
@@ -1571,7 +1639,7 @@ export default function Visualization({ showParamsPanel }) {
                           width: "129px",
                           fontWeight: 600,
                           fontSize: "14px",
-                          color: "#222933",
+                          color: "var(--subtext)",
                           marginTop: "6px"
                         }}
                       >
@@ -1583,16 +1651,17 @@ export default function Visualization({ showParamsPanel }) {
                           style={{
                             display: "flex",
                             alignItems: "center",
-                            border: bsErrors.x ? "1px solid red" : "1px solid #d3d3d3",
+                            border: bsErrors.x ? "1px solid var(--error)" : "1px solid var(--border)",
                             borderRadius: "6px",
                             padding: "4px 8px",
                             width: "110px",
-                            background: "white",
-                            justifyContent: "space-between"
+                            background: "var(--bg)",
+                            justifyContent: "space-between",
+                            fontFamily: "sans-serif"
                           }}
                         >
-                          <span style={{ fontSize: "14px", color: "#999" }}>{t("visualization.x")}</span>
-                          <div style={{ width: "1px", height: "18px", background: "#ddd", margin: "0 6px" }} />
+                          <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>{t("visualization.x")}</span>
+                          <div style={{ width: "1px", height: "18px", background: "var(--border)", margin: "0 6px" }} />
                           <input
                             type="number"
                             value={bsParams.x}
@@ -1605,26 +1674,33 @@ export default function Visualization({ showParamsPanel }) {
                               outline: "none",
                               fontSize: "14px",
                               textAlign: "right",
-                              paddingRight: "4px"
+                              paddingRight: "4px",
+                              fontFamily: "sans-serif",
+                              MozAppearance: "textfield",
+                              background: "transparent",
+                              color: "var(--text)",
+                              WebkitAppearance: "none",
+                              appearance: "none"
                             }}
                           />
-                          <span style={{ color: "#999", fontSize: "12px", marginLeft: "-15px" }}>{t("visualization.meters")}</span>
+                          <span style={{ color: "var(--text-secondary)", fontSize: "12px", marginLeft: "-15px" }}>{t("visualization.meters")}</span>
                         </div>
                         {/* Y */}
                         <div
                           style={{
                             display: "flex",
                             alignItems: "center",
-                            border: bsErrors.y ? "1px solid red" : "1px solid #d3d3d3",
+                            border: bsErrors.y ? "1px solid var(--error)" : "1px solid var(--border)",
                             borderRadius: "6px",
                             padding: "4px 8px",
                             width: "110px",
-                            background: "white",
-                            justifyContent: "space-between"
+                            background: "var(--bg)",
+                            justifyContent: "space-between",
+                            fontFamily: "sans-serif"
                           }}
                         >
-                          <span style={{ fontSize: "14px", color: "#999" }}>{t("visualization.y")}</span>
-                          <div style={{ width: "1px", height: "18px", background: "#ddd", margin: "0 6px" }} />
+                          <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>{t("visualization.y")}</span>
+                          <div style={{ width: "1px", height: "18px", background: "var(--border)", margin: "0 6px" }} />
                           <input
                             type="number"
                             value={bsParams.y}
@@ -1637,10 +1713,16 @@ export default function Visualization({ showParamsPanel }) {
                               outline: "none",
                               fontSize: "14px",
                               textAlign: "right",
-                              paddingRight: "4px"
+                              paddingRight: "4px",
+                              fontFamily: "sans-serif",
+                              MozAppearance: "textfield",
+                              background: "transparent",
+                              color: "var(--text)",
+                              WebkitAppearance: "none",
+                              appearance: "none"
                             }}
                           />
-                          <span style={{ color: "#999", fontSize: "12px", marginLeft: "-15px" }}>{t("visualization.meters")}</span>
+                          <span style={{ color: "var(--text-secondary)", fontSize: "12px", marginLeft: "-15px" }}>{t("visualization.meters")}</span>
                         </div>
                       </div>
                     </div>
@@ -1651,14 +1733,14 @@ export default function Visualization({ showParamsPanel }) {
                         { key: "bandwidth", label: t("visualization.bandwidth_MHz"), unit: t("visualization.MHz"), spacing: 20 }
                       ].map(param => (
                         <div key={param.key} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                          <span style={{ width: "119px", fontWeight: 600, fontSize: "14px", color: "#222933" }}>
+                          <span style={{ width: "119px", fontWeight: 600, fontSize: "14px", color: "var(--subtext)" }}>
                             {param.label}:
                           </span>
                           <div
                             style={{
                               display: "flex",
                               alignItems: "center",
-                              border: bsErrors[param.key] ? "1px solid red" : "1px solid #d3d3d3",
+                              border: bsErrors[param.key] ? "1px solid var(--error)" : "1px solid var(--border)",
                               borderRadius: "6px",
                               padding: "4px 8px",
                               width: "110px",
@@ -1680,14 +1762,19 @@ export default function Visualization({ showParamsPanel }) {
                                 fontSize: "14px",
                                 textAlign: "right",
                                 paddingRight: `${param.spacing}px`, // разное расстояние к единице
-                                fontFamily: "sans-serif"
+                                fontFamily: "sans-serif",
+                                MozAppearance: "textfield",
+                                background: "transparent",
+                                color: "var(--text)",
+                                WebkitAppearance: "none",
+                                appearance: "none"
                               }}
                             />
                             <span
                               style={{
                                 position: "absolute",
                                 right: "8px",
-                                color: "#999",
+                                color: "var(--text-secondary)",
                                 fontSize: "12px"
                               }}
                             >
@@ -1707,7 +1794,7 @@ export default function Visualization({ showParamsPanel }) {
 
       {/* Основной контент */}
       <div style={{ flex: 1, marginLeft: showParamsPanel ? "0" : "30px", paddingTop: "20px", paddingLeft: "20px" }}>
-        <h1 style={{ fontSize: "30px", marginTop: "0px", fontFamily: "sans-serif", color: "#222933", marginBottom: "20px", marginLeft: "-20px" }}>
+        <h1 style={{ fontSize: "30px", marginTop: "0px", fontFamily: "sans-serif", color: "var(--text)", marginBottom: "20px", marginLeft: "-20px" }}>
           {t("mainContent.title")}
         </h1>
         <Graphs selectedGraphs={selectedGraphs} graphData={graphData} />

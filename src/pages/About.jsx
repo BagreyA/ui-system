@@ -10,7 +10,7 @@ export default function About() {
         style={{
           fontSize: "30px",
           fontFamily: "sans-serif",
-          color: "#222933",
+          color: "var(--text)",
           marginBottom: "20px"
         }}
       >
@@ -20,7 +20,7 @@ export default function About() {
         style={{
           fontSize: "15px",
           fontFamily: "sans-serif",
-          color: "#2A3D4C",
+          color: "var(--subtext)",
           lineHeight: "1.5"
         }}
       >

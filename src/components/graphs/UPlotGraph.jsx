@@ -3,7 +3,7 @@ import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 
 export default function UPlotGraph({ width, height, series, type = "line", xLabel= "", yLabel= "" }) {
-  const containerRef = useRef(null);
+  const containerRef = useRef();
   const plotRef = useRef(null);
 
   useEffect(() => {
@@ -96,12 +96,12 @@ export default function UPlotGraph({ width, height, series, type = "line", xLabe
       <div
         style={{
           position: "absolute",
-          bottom: "-18px",
+          bottom: "-6px",
           left: "50%",
           transform: "translateX(-50%)",
           fontSize: "12px",
           fontFamily: "sans-serif",
-          color: "#222933",
+          color: "var(--text)",
         }}
       >
         {xLabel}
@@ -118,7 +118,7 @@ export default function UPlotGraph({ width, height, series, type = "line", xLabe
           transform: "rotate(-90deg) translateY(-50%)",
           fontSize: "12px",
           fontFamily: "sans-serif",
-          color: "#222933",
+          color: "var(--text)",
           textAlign: "center",
         }}
       >

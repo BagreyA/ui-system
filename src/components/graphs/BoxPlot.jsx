@@ -36,7 +36,7 @@ export default function BoxPlot({ data, width, height }) {
           dataKey="median"
           width={4}
           strokeWidth={2}
-          stroke="#222933"
+          stroke="var(--text)"
           direction="y"
           data={errorData}
         />

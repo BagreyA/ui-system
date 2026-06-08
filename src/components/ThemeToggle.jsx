@@ -53,7 +53,7 @@ export default function ThemeToggle() {
           fontSize: "16px",
           cursor: "pointer",
           fontFamily: "sans-serif",
-          color: isDarkTheme ? "#f8f9fa" : "#222933"
+          color: isDarkTheme ? "var(--text)" : "var(--text)"
         }}
       >
         {i18n.language.toUpperCase()}
