@@ -26,7 +26,7 @@ export default function SubplotsLineUE({ series, width, height }) {
         <div
           key={idx}
           style={{
-            border: "1px solid #ccc",
+            border: "1px solid var(--text-secondary)",
             borderRadius: "6px",
             padding: "4px",
             display: "flex",

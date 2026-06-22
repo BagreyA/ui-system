@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { getCSSVar } from "../colors";
 
 const ueColors = [
   "#00A7C1",
@@ -57,7 +58,7 @@ export default function UserMobilityGraph({ width, height }) {
       ctx.clearRect(0, 0, width, height);
 
       // фон
-      ctx.fillStyle = "#0b1220";
+      ctx.fillStyle = getCSSVar("--bg");
       ctx.fillRect(0, 0, width, height);
 
       const users = usersRef.current;
@@ -73,7 +74,7 @@ export default function UserMobilityGraph({ width, height }) {
         ctx.fill();
 
         // label
-        ctx.fillStyle = "#fff";
+        ctx.fillStyle = getCSSVar("--bg");
         ctx.font = "10px sans-serif";
         ctx.fillText(`UE${i + 1}`, x + 8, y + 4);
       });

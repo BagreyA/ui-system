@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 
-export default function useSimulationData(useLiveMode = false) {
+export default function useSimulationData(useLiveMode = true, config = null) {
   const [graphData, setGraphData] = useState({});
   const [gridData, setGridData] = useState({ ttiSlots: [], grid: [] });
+  const [statsBuffer, setStatsBuffer] = useState([]);
 
   useEffect(() => {
     // =========================
@@ -11,9 +12,10 @@ export default function useSimulationData(useLiveMode = false) {
     if (!useLiveMode) {
       const loadMockData = async () => {
         try {
-          const [statsRes, detailedRes] = await Promise.all([
+          const [statsRes, detailedRes, positionsRes] = await Promise.all([
             fetch("/data/sim_stats.json"),
             fetch("/data/sim_stats_detailed.json"),
+            fetch("/data/sim_1000_tti_positions.json"),
           ]);
 
           const stats = await statsRes.json();
@@ -84,82 +86,102 @@ export default function useSimulationData(useLiveMode = false) {
       return;
     }
 
-    // =========================
-    // LIVE MODE (WEBSOCKET)
-    // =========================
-    const ws = new WebSocket("ws://localhost:8000/api/v1/ws/json_stream");
+  let ws;
 
-    ws.onopen = () => {
-      console.log("WebSocket connected (JSON)");
-    };
-
-    ws.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
-      if (msg.type !== "data") return;
-
-      const stats = msg.sim_stats;
-      const detailed = msg.sim_stats_detailed;
-
-      if (!stats || !stats.length) return;
-
-      const graphResult = {};
-      const x = stats.map((row) => row.tti);
-
-      Object.keys(stats[0])
-        .filter((k) => k !== "tti")
-        .forEach((key) => {
-          graphResult[key] = {
-            label: key,
-            x,
-            data: stats.map((row) => row[key] ?? null),
-          };
-        });
-
-      setGraphData(graphResult);
-
-      const ttiKeys = Object.keys(detailed)
-        .map(Number)
-        .sort((a, b) => a - b);
-
-      const maxRB = Math.max(
-        ...ttiKeys.map((tti) =>
-          Object.values(detailed[tti]).reduce(
-            (sum, ue) => sum + (ue.rb_allocated || 0),
-            0
-          )
-        )
-      );
-
-      const grid = Array.from({ length: maxRB }, () =>
-        Array(ttiKeys.length).fill(null)
-      );
-
-      ttiKeys.forEach((tti, colIdx) => {
-        const ueList = Object.entries(detailed[tti]);
-
-        let rbIndex = 0;
-
-        ueList.forEach(([ueId, ue]) => {
-          const rbCount = ue.rb_allocated || 0;
-
-          for (let i = 0; i < rbCount; i++) {
-            if (rbIndex < maxRB) {
-              grid[rbIndex][colIdx] = parseInt(ueId);
-              rbIndex++;
-            }
-          }
-        });
+  const start = async () => {
+    try {
+      // =========================
+      // ШАГ 1 — ЗАПУСК СИМУЛЯЦИИ
+      // =========================
+      const res = await fetch("http://localhost:8000/api/v1/sim/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(config), // 👈 твой config должен быть здесь
       });
 
-      setGridData({ ttiSlots: ttiKeys, grid });
-    };
+      const data = await res.json();
+      const runId = data.data.run_id;
 
-    ws.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
+      // =========================
+      // ШАГ 2 — WEBSOCKET
+      // =========================
+      ws = new WebSocket(
+        `ws://localhost:8000/api/v1/ws/simulation/${runId}/stats`
+      );
 
-    return () => ws.close();
-  }, [useLiveMode]);
+      ws.onopen = () => {
+        console.log("WebSocket connected");
+      };
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+
+        if (msg.type === "completed") return;
+        if (msg.type !== "tti") return;
+
+        const snap = msg.data;
+
+        setStatsBuffer(prev => {
+          const updated = [...prev, snap];
+
+          const x = updated.map(d => d.tti);
+
+          const graphResult = {};
+          const keys = Object.keys(updated[0]?.cell || {});
+
+          keys.forEach(key => {
+            graphResult[key] = {
+              label: key,
+              x,
+              data: updated.map(d => d.cell[key] ?? null),
+            };
+          });
+
+          setGraphData(graphResult);
+
+          const maxRB = Math.max(
+            ...updated.map(d => d.resource_grid.length)
+          );
+
+          const grid = Array.from({ length: maxRB }, () =>
+            Array(updated.length).fill(null)
+          );
+
+          updated.forEach((s, colIdx) => {
+            let rbIndex = 0;
+
+            s.resource_grid.forEach(cell => {
+              if (rbIndex < maxRB) {
+                grid[rbIndex][colIdx] = cell.ue_id;
+                rbIndex++;
+              }
+            });
+          });
+
+          setGridData({
+            ttiSlots: updated.map(d => d.tti),
+            grid,
+          });
+
+          return updated;
+        });
+      };
+
+      ws.onclose = () => {
+        console.log("WebSocket disconnected");
+      };
+
+    } catch (err) {
+      console.error("Failed to start simulation:", err);
+    }
+  };
+
+  start();
+
+  return () => {
+    if (ws) ws.close();
+  };
+}, [useLiveMode]);
 
   return { graphData, gridData };
 }

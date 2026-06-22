@@ -345,7 +345,7 @@
   },
     "about": {
     "title": "Development Team",
-    "text": "This section is still under development and will be completed at the final stage of the project."
+    "text": "This project is a web application for modeling and analyzing the operation of resource planning algorithms in mobile networks. The user can configure simulation parameters, run experiments, observe the results in real time and analyze the statistics obtained. The project was developed using React, FastAPI, and its own Python simulation core."
   },
 
   "title": "Tests",
@@ -430,19 +430,11 @@
   },
   "graphs": {
     "lteGrid": "LTE Resource Grid (RB × TTI)",
-    "sinrGraph": "SINR UE",
     "cellThroughput": "Cell Throughput (kbps)",
-    "userThroughputPerUE": "User Throughput per UE (kbps)",
-    "averageCellThroughput": "Average Cell Throughput",
     "userAvgThroughput": "Average User Throughput",
     "fairnessJainOverall": "General Jain Index for Planners",
-    "cellThroughputCompare": "Cell Throughput (Schedulers)",
     "cellThroughputAvg": "Cell Throughput (Moving Average)",
     "userAvgThroughputSmoothed": "User Throughput per UE (Moving Average)",
-    "fairnessCompare": "Jain Index (Schedulers)",
-    "spectralEfficiency": "Spectral Efficiency (bps/Hz)",
-    "throughputBoxplot": "User Throughput Distribution",
-    "schedulerEfficiency": "Scheduler Execution Time (µs)",
     "trafficOnOff": "Traffic generation based on the On-Off model",
     "userMobility": "User Movement Map",
     "axisX": "X",

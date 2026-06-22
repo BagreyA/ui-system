@@ -23,7 +23,7 @@ export default function SubplotsLineUE({ series, width, height }) {
       }}
     >
       {series.data.map((ueData, idx) => (
-        <div key={idx} style={{ border: "1px solid #ccc", borderRadius: "6px", padding: "4px" }}>
+        <div key={idx} style={{ border: "1px solid var(--text-secondary)", borderRadius: "6px", padding: "4px" }}>
           <div style={{ textAlign: "center", fontSize: "12px", marginBottom: "4px" }}>
             Пропускная способность UE{series.userIds[idx]} (Мбит/с)
           </div>

@@ -27,7 +27,7 @@ export default function BoxPlot({ data, width, height }) {
 
   return (
     <ComposedChart width={width} height={height} data={data} margin={{ top: 20, bottom: 20 }}>
-      <CartesianGrid stroke="#f5f5f5" />
+      <CartesianGrid stroke="var(--card)" />
       <XAxis dataKey="name" tickFormatter={(val) => `UE ${val}`}/>
       <YAxis label={{ value: "Пропускная способность (кбит/с)", angle: -90, position: "insideLeft" }}/>
       <Tooltip />

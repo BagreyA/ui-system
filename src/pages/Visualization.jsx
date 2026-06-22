@@ -184,10 +184,8 @@ export default function Visualization({ showParamsPanel }) {
 
   const graphs = [
     { key: "lteGrid", name: t("graphs.lteGrid", "LTE Resource Grid (RB × TTI)") },
-//    { key: "sinrGraph", name: t("graphs.sinrGraph", "SINR UE") },
     { key: "cellThroughput", name: t("graphs.cellThroughput", "Cell Throughput") },
     { key: "cellThroughputAvg", name: t("graphs.cellThroughputAvg", "Cell Throughput (Avg)") },
-//    { key: "userThroughputPerUE", name: t("graphs.userThroughputPerUE", "User Throughput") },
     { key: "userAvgThroughput", name: t("graphs.userAvgThroughput", "Average User Throughput") },
     { key: "userAvgThroughputSmoothed", name: t("graphs.userAvgThroughputSmoothed", "User Throughput (Avg)") },
     { key: "fairnessJainOverall", name: t("graphs.fairnessJainOverall", "General Jain Index for Planners") },

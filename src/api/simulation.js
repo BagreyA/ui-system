@@ -51,30 +51,12 @@ const defaultConfigs = {
 
 // --- Получение списка конфигураций ---
 export const getConfigsList = async () => {
-  try {
-    const response = await axios.get("/configs/list");
-    return response.data || [];
-  } catch (err) {
-    console.warn("Backend недоступен, возвращаем дефолтные конфиги.");
-    return Object.keys(defaultConfigs);
-  }
+  return Object.keys(defaultConfigs);
 };
 
 // --- Получение параметров конкретной конфигурации ---
 export const getConfigParams = async (configName) => {
-  try {
-    // Сначала проверяем дефолтные конфиги
-    if (defaultConfigs[configName]) return { ...defaultConfigs[configName] };
-
-    // Иначе пробуем получить с сервера
-    const response = await axios.get(`/configs/${configName}`);
-    const data = response.data;
-    if (!data.selectedScheduler) data.selectedScheduler = "Round Robin";
-    return data;
-  } catch (err) {
-    console.error(`Ошибка получения конфигурации ${configName}:`, err);
-    return defaultConfigs[configName] || null;
-  }
+  return defaultConfigs[configName] || null;
 };
 
 // --- Сохранение конфигурации на сервер ---

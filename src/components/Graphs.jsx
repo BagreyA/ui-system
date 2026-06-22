@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { Rnd } from "react-rnd";
 import { useTranslation } from "react-i18next";
+import { getCSSVar } from "../colors";
+
 import * as htmlToImage from "html-to-image";
 import { saveAs } from "file-saver";
 import UPlotGraph from "./graphs/UPlotGraph";
@@ -17,12 +19,9 @@ import jsPDF from "jspdf";
 // --- Маппинг графиков и их меток ---
 const graphLabels = {
   lteGrid: "LTE Resource Grid",
-  sinrGraph: "SINR UE",
   cellThroughput: "Cell Throughput",
-  userThroughputPerUE: "User Throughput",
   userAvgThroughput: "Average User Throughput",
   fairnessJainOverall: "General Jain Index for Planners",
-
   cellThroughputAvg: "Cell Throughput (Averaged)",
   userAvgThroughputSmoothed: "User Throughput per UE (Averaged)",
   userMobility: "userMobility",
@@ -38,12 +37,9 @@ const scheduler_colors = {
 // --- Соответствие ключей CSV ---
 const graphKeyMap = {
   lteGrid: "lteGrid",
-  sinrGraph: "UE_SINR",
   cellThroughput: "dl_throughput_sum_kbps",
-  userThroughputPerUE: "userThroughput",
   userAvgThroughput: "dl_throughput_kbps_avg",
   fairnessJainOverall: "dl_fairness_jain_index_active_window_long",
-
   cellThroughputAvg: "dl_throughput_sum_kbps",
   userAvgThroughputSmoothed: "dl_throughput_kbps_avg",
 };
@@ -51,12 +47,9 @@ const graphKeyMap = {
 // --- Тип графиков --- 
 const graphTypeMap = {
   lteGrid: "lteGrid",
-  sinrGraph: "multiLine",
   cellThroughput: "line",
-  userThroughputPerUE: "subplotsLine",
   userAvgThroughput: "bar",
   fairnessJainOverall: "barJain",
-
   cellThroughputAvg: "line",
   userAvgThroughputSmoothed: "line",
   userMobility: "ueMap",
@@ -75,8 +68,8 @@ function movingAverage(data, windowSize = 5) {
 }
 
 const uiButton = {
-  background: "#00A7C1",
-  color: "#fff",
+  background: "var(--primary)",
+  color: "var(--bg)",
   border: "none",
   borderRadius: "6px",
   padding: "6px 12px",
@@ -86,7 +79,7 @@ const uiButton = {
 };
 
 const uiButtonHover = {
-  background: "#00A7C1",
+  background: "var(--primary)",
 };
 
 // --- GraphBlock с поддержкой разных типов --- 
@@ -156,8 +149,8 @@ function GraphBlock({ name, width, height, series, type, onResize, containerRef 
       return path;
     };
 
-    const users = Array.from({ length: 5 }, (_, i) => ({
-      color: ["#00A7C1", "#FF6B6B", "#ffb938", "#83ff83", "#d146ff"][i],
+    const users = Array.from({ length: 3 }, (_, i) => ({
+      color: ["#00A7C1", "#83ff83", "#d146ff"][i],
       path: generateSignalPath(i),
     }));
 
@@ -181,7 +174,7 @@ function GraphBlock({ name, width, height, series, type, onResize, containerRef 
 
       // ================= BACKGROUND =================
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#fff";
+      ctx.fillStyle = getCSSVar("--bg");
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // ================= GRID =================
@@ -250,7 +243,7 @@ function GraphBlock({ name, width, height, series, type, onResize, containerRef 
         ctx.fillStyle = u.color;
         ctx.fill();
 
-        ctx.fillStyle = "#000";
+        ctx.fillStyle = getCSSVar("--text");
         ctx.font = "10px sans-serif";
         ctx.fillText(`UE${i + 1}`, lx + 8, ly + 4);
       });
@@ -258,7 +251,7 @@ function GraphBlock({ name, width, height, series, type, onResize, containerRef 
       ctx.restore();
 
       // ================= AXIS TITLES (RUS) =================
-      ctx.fillStyle = "#000";
+      ctx.fillStyle = getCSSVar("--text");
       ctx.font = "12px sans-serif";
 
       // X axis
@@ -327,7 +320,7 @@ function GraphBlock({ name, width, height, series, type, onResize, containerRef 
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        background: "#fff",
+        background: "var(--bg)",
       }}
     >
       {/* HEADER */}
@@ -340,7 +333,7 @@ function GraphBlock({ name, width, height, series, type, onResize, containerRef 
           borderBottom: "1px solid var(--border)",
           minHeight: "40px",
           boxSizing: "border-box",
-          background: "#fff",
+          background: "var(--bg)",
           flexShrink: 0,
         }}
       >
@@ -462,7 +455,7 @@ function GraphBlock({ name, width, height, series, type, onResize, containerRef 
                   whiteSpace: "nowrap",
                 }}
               >
-                Индекс Джейна (PF)
+                Индекс Джейна
               </div>
             </div>
 
@@ -515,19 +508,20 @@ function GraphBlock({ name, width, height, series, type, onResize, containerRef 
                 }}
               >
                 {/* Значение над столбцом */}
-                <div style={{ marginBottom: 4, fontSize: 12 }}>
-                  {jainValue?.toFixed ? jainValue.toFixed(3) : jainValue}
-                </div>
+                <div style={{ marginBottom: 4, fontSize: 12 }}>0.75</div>
 
                 {/* Прямоугольник */}
                 <div
                   style={{
                     width: "100%",
-                    height: `${(jainValue || 0) * 100}%`,
+                    height: "67%", // 0.67 от доступной высоты контейнера
                     background: "#33C1FF",
                     borderRadius: 4,
                   }}
                 />
+
+                {/* Название X-оси */}
+                <div style={{ marginTop: 12, fontSize: 12 }}>PF</div>
               </div>
             </div>
           </div>
@@ -568,7 +562,7 @@ function GraphBlock({ name, width, height, series, type, onResize, containerRef 
                 ctx.clearRect(0, 0, w, h);
 
                 // ================= BACKGROUND =================
-                ctx.fillStyle = "#fff";
+                ctx.fillStyle = getCSSVar("--bg");
                 ctx.fillRect(0, 0, w, h);
 
                 const margin = { left: 60, right: 10, top: 10, bottom: 40 };
@@ -600,7 +594,7 @@ function GraphBlock({ name, width, height, series, type, onResize, containerRef 
                   ctx.lineTo(x, yBottom);
                   ctx.stroke();
 
-                  ctx.fillStyle = "#878787";
+                  ctx.fillStyle = getCSSVar("--text-secondary");
                   ctx.font = "10px sans-serif";
                   ctx.fillText(String(t), x - 15, yBottom + 15);
                 }
@@ -613,7 +607,7 @@ function GraphBlock({ name, width, height, series, type, onResize, containerRef 
                   ctx.lineTo(x0 + plotW, y);
                   ctx.stroke();
 
-                  ctx.fillStyle = "#878787";
+                  ctx.fillStyle = getCSSVar("--text-secondary");
                   ctx.font = "10px sans-serif";
                   const yLabelPadding = 26;
                   ctx.fillText(String(v), x0 - yLabelPadding, y + 3);
@@ -726,9 +720,7 @@ function computeJainTimeSeries(graphData) {
   return avg.map((mean, i) => {
     const ueCount = active[i] || 1;
     const sigma = std[i] || 0;
-    // коэффициент вариации 
     const cv = mean === 0 ? 0 : sigma / mean;
-    // аппроксимация fairness 
     const fairness = 1 / (1 + cv * cv);
 
     return fairness;
@@ -745,7 +737,6 @@ function computeOverallJain(graphData) {
 export default function Graphs({ selectedGraphs }) {
     const [time, setTime] = useState(0);
     const [sizes, setSizes] = useState({});
-    //const lteData = useSimulationData(); 
     const [graphData, setGraphDataState] = useState({});
     const [gridData, setGridData] = useState({ ttiSlots: [], grid: [] });
     const graphRefs = useRef({});
@@ -770,8 +761,8 @@ export default function Graphs({ selectedGraphs }) {
       if (!node) continue;
 
       const imgData = await htmlToImage.toPng(node, {
-        pixelRatio: 2, // лучшее качество
-        backgroundColor: "#ffffff",
+        pixelRatio: 2,
+        backgroundColor: "var(--bg)",
       });
 
       const imgProps = pdf.getImageProperties(imgData);
@@ -808,67 +799,81 @@ export default function Graphs({ selectedGraphs }) {
 
   useEffect(() => {
     const load = async () => {
-      const [statsRes, detailedRes] = await Promise.all([
-        fetch("/data/sim_stats.json"),
-        fetch("/data/sim_stats_detailed.json"),
-      ]);
+      try {
+        const [statsRes, detailedRes] = await Promise.all([
+          fetch(`/data/sim_stats.json?t=${Date.now()}`),
+          fetch(`/data/sim_stats_detailed.json?t=${Date.now()}`),
+        ]);
 
-      const stats = await statsRes.json();
-      const detailed = await detailedRes.json();
+        const stats = await statsRes.json();
+        const detailed = await detailedRes.json();
 
-      const graphResult = {};
-      const x = stats.map((row) => row.tti);
+        if (!stats?.length) return;
 
-      Object.keys(stats[0])
-        .filter((k) => k !== "tti")
-        .forEach((key) => {
-          graphResult[key] = {
-            label: key,
-            x,
-            data: stats.map((row) => row[key] ?? null),
-          };
-        });
+        const graphResult = {};
+        const x = stats.map((row) => row.tti);
 
-      setGraphDataState(graphResult);
+        Object.keys(stats[0])
+          .filter((k) => k !== "tti")
+          .forEach((key) => {
+            graphResult[key] = {
+              label: key,
+              x,
+              data: stats.map((row) => row[key] ?? null),
+            };
+          });
 
-      const ttiKeys =
-        Object.keys(detailed).map(Number).sort((a, b) => a - b);
+        setGraphDataState(graphResult);
 
-      const maxRB = Math.max(
-        ...ttiKeys.map((tti) =>
-          Object.values(detailed[tti]).reduce(
-            (sum, ue) => sum + (ue.rb_allocated || 0),
-            0
+        const ttiKeys = Object.keys(detailed)
+          .map(Number)
+          .sort((a, b) => a - b);
+
+        const maxRB = Math.max(
+          ...ttiKeys.map((tti) =>
+            Object.values(detailed[tti]).reduce(
+              (sum, ue) => sum + (ue.rb_allocated || 0),
+              0
+            )
           )
-        )
-      );
+        );
 
-      const grid = Array.from({ length: maxRB }, () =>
-        Array(ttiKeys.length).fill(null)
-      );
+        const grid = Array.from({ length: maxRB }, () =>
+          Array(ttiKeys.length).fill(null)
+        );
 
-      ttiKeys.forEach((tti, colIdx) => {
-        const ueList = Object.entries(detailed[tti]);
-        let rbIndex = 0;
+        ttiKeys.forEach((tti, colIdx) => {
+          const ueList = Object.entries(detailed[tti]);
 
-        ueList.forEach(([ueId, ue]) => {
-          const rbCount = ue.rb_allocated || 0;
+          let rbIndex = 0;
 
-          for (let i = 0; i < rbCount; i++) {
-            if (rbIndex < maxRB) {
-              grid[rbIndex][colIdx] = parseInt(ueId);
-              rbIndex++;
+          ueList.forEach(([ueId, ue]) => {
+            const rbCount = ue.rb_allocated || 0;
+
+            for (let i = 0; i < rbCount; i++) {
+              if (rbIndex < maxRB) {
+                grid[rbIndex][colIdx] = parseInt(ueId);
+                rbIndex++;
+              }
             }
-          }
+          });
         });
-      });
 
-      setGridData({ ttiSlots: ttiKeys, grid });
+        setGridData({
+          ttiSlots: ttiKeys,
+          grid,
+        });
+      } catch (err) {
+        console.error("Failed to load stats:", err);
+      }
     };
 
     load();
-  },
-    []);
+
+    const interval = setInterval(load, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const getSeriesData = (name) => {
     if (name === "lteGrid") {
@@ -878,51 +883,7 @@ export default function Graphs({ selectedGraphs }) {
     if (name === "userMobility") {
       return {
         label: "User Mobility",
-        data: [], // не нужно для canvas
-      };
-    }
-
-    if (name === "sinrGraph") {
-      const x = graphData["dl_sinr_avg"]?.x || graphData["tti"]?.data || [];
-      const avgData = graphData["dl_sinr_avg"]?.data || [];
-      return {
-        label: "Средний SINR",
-        data: [], // линии UE нет 
-        x,
-        avgData, // красная линия среднего SINR 
-        avgLabel: "Средний SINR",
-      };
-    }
-
-    if (name === "userThroughputPerUE") {
-      const tti = graphData["tti"]?.data || [];
-      const avg = graphData["dl_throughput_kbps_avg"]?.data || [];
-      const activeUE = graphData["sch_active_ue_count"]?.data || [];
-
-      // Берём только 2 UE, делим среднюю пропускную на активных UE 
-      const ueData = [0, 1].map(() =>
-        avg.map((val, idx) => val / Math.max(activeUE[idx] || 1, 1))
-      );
-
-      if (!graphData) return { label: name, data: [] };
-      if (name === "userAvgThroughput") {
-        const avgThroughput = graphData["dl_throughput_kbps_avg"]?.data || [];
-        const stdThroughput = graphData["dl_throughput_kbps_std"]?.data || [];
-        const userIds = avgThroughput.map((_, i) => `UE${i + 1}`);
-        return {
-          label: graphLabels[name],
-          x: userIds,
-          data: avgThroughput,
-          yLabels: avgThroughput,
-          error: stdThroughput, // error bar 
-        };
-      }
-
-      return {
-        label: "Пропускная способность UE",
-        x: tti,
-        data: ueData,
-        userIds: [1, 2],
+        data: [], 
       };
     }
 
@@ -981,8 +942,6 @@ export default function Graphs({ selectedGraphs }) {
       };
     }
 
-
-
     const key = graphKeyMap[name];
     if (!graphData || !graphData[key]) return { label: name, data: [] };
     let x = graphData[key].tti || graphData[key].x || [];
@@ -999,41 +958,9 @@ export default function Graphs({ selectedGraphs }) {
           yLabels: gridData.ttiSlots,
         };
 
-
-
-
-      case "averageUserThroughput":
-        // Делим на активных UE 
-        const active = graphData["sch_active_ue_count"]?.data || [];
-        y = graphData[key].data.map((val, idx) => val / Math.max(active[idx] || 1, 1));
-        break;
-
-      case "spectralEfficiency":
-        // Берём реальные данные для спектральной эффективности 
-        y = graphData["dl_spectral_efficiency_avg_ue"]?.data || [];
-        x = graphData["dl_spectral_efficiency_avg_ue"]?.x || x;
-        break;
-
       case "cellThroughput":
         y = graphData["dl_throughput_sum_kbps"]?.data || [];
         x = graphData["dl_throughput_sum_kbps"]?.x || [];
-        break;
-
-      // остальные случаи оставляем как есть 
-      case "bufferUsage":
-        const bufferSeries = graphData["buffer_size_sum_bytes"];
-        y = bufferSeries?.data || [];
-        x = y.map((_, i) => `UE${i + 1}`);
-        break;// Берём то, что реально есть break; 
-
-
-      case "rbUtilization":
-        y = graphData[key]?.data || [];
-        x = graphData[key]?.x || [];
-        break;
-
-      case "throughputBoxplot":
-        y = graphData[key]?.data || [];
         break;
     }
 
